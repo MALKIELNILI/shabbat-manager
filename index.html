@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ניהול שבתות אירוח</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #0d0d1a 0%, #0a1628 50%, #0d1020 100%);
+  color: #e8e8f0;
+  font-family: 'Segoe UI', 'Arial Hebrew', Arial, sans-serif;
+  direction: rtl;
+  padding-bottom: 60px;
+
+input, select, textarea {
+  background: #0d1628; border: 1px solid #2a3a5e; border-radius: 8px;
+  color: #e8e8f0; padding: 8px 10px; font-size: 14px; width: 100%;
+  direction: rtl; font-family: inherit;
+
+input:focus, select:focus, textarea:focus { outline: 2px solid #e8c97e55; }
+button { cursor: pointer; font-family: inherit; border: none; border-radius: 10px; padding: 8px 14px; font-size: 14px; transition: opacity 0.2s; }
+button:hover { opacity: 0.85; }
+.header {
+  background: linear-gradient(135deg, #1a1a3e, #0a1628);
+  border-bottom: 1px solid #e8c97e33; padding: 14px 20px;
+  display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; z-index: 100;
+
+.header-title { font-size: 20px; font-weight: 800; color: #e8c97e; }
+.header-sub { font-size: 11px; color: #a0b4cc; margin-top: 2px; }
+.sync-bar {
+  background: #070d1a; border-bottom: 1px solid #1a2a3e;
+  padding: 5px 20px; font-size: 12px; display: flex; align-items: center; gap: 10px;
+  direction: rtl; min-height: 28px;
+
+.tabs { display: flex; border-bottom: 1px solid #e8c97e22; padding: 0 16px; background: #0a0f1e; }
+.tab-btn {
+  padding: 11px 18px; border: none; background: none; cursor: pointer;
+  color: #a0b4cc; border-bottom: 2px solid transparent; font-size: 14px;
+  font-family: inherit; transition: all 0.2s;
+
+.tab-btn.active { color: #e8c97e; border-bottom: 2px solid #e8c97e; font-weight: 700; }
+.content { padding: 16px; max-width: 900px; margin: 0 auto; }
+.card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid #e8c97e33; border-radius: 16px; padding: 18px;
+  margin-bottom: 14px; position: relative; overflow: hidden;
+
+.card-top-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.section-card { background: linear-gradient(135deg, #1a1a2e, #16213e); border: 1px solid #e8c97e22; border-radius: 14px; padding: 16px; }
+.section-title { font-size: 15px; font-weight: 700; color: #e8c97e; margin-bottom: 12px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+.grid5 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 8px; }
+.grid6 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr; gap: 6px; }
+.stat-box { background: #0a1628; border-radius: 10px; padding: 8px 10px; text-align: center; }
+.stat-label { font-size: 11px; color: #a0b4cc; margin-bottom: 2px; }
+.stat-val { font-size: 14px; font-weight: 700; }
+.stat-sub { font-size: 10px; color: #ff7b7b; }
+.big-stat { background: linear-gradient(135deg, #1a1a2e, #16213e); border: 1px solid #e8c97e22; border-radius: 14px; padding: 14px; text-align: center; }
+.big-stat-label { font-size: 12px; color: #a0b4cc; margin-bottom: 4px; }
+.big-stat-val { font-size: 20px; font-weight: 800; }
+.pay-box { border-radius: 10px; padding: 10px; cursor: pointer; transition: opacity 0.2s; }
+.pay-box:hover { opacity: 0.85; }
+.mini-worker { background: #0a1628; border-radius: 8px; padding: 6px 8px; text-align: center; }
+.mini-worker-label { font-size: 10px; color: #a0b4cc; }
+.mini-worker-val { font-size: 13px; font-weight: 700; }
+.row-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e8c97e11; font-size: 14px; color: #a0b4cc; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.88); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+.modal-box { background: linear-gradient(135deg, #1a1a2e, #0a1628); border: 1px solid #e8c97e44; border-radius: 18px; padding: 24px; width: 100%; max-width: 780px; max-height: 90vh; overflow-y: auto; }
+.hidden { display: none; }
+.field-label { font-size: 13px; color: #a0b4cc; margin-bottom: 4px; margin-top: 10px; }
+.btn-gold { background: #e8c97e; color: #0a1628; font-weight: 700; }
+.btn-blue { background: #2a3a5e; color: #fff; }
+.btn-green { background: #1e5c34; color: #fff; }
+.btn-red { background: #5e2a2a; color: #fff; }
+.btn-gray { background: #2a2a4e; color: #fff; }
+.btn-wa { background: #25d366; color: #fff; }
+.btn-tiny { padding: 4px 8px; font-size: 11px; border-radius: 6px; }
+.empty-state { text-align: center; color: #a0b4cc; padding: 60px; }
+.calc-preview { background: #070d1a; border-radius: 10px; padding: 12px; margin-top: 10px; border: 1px solid #1a2a3e; }
+/* SETUP SCREEN */
+#setupScreen {
+  position: fixed; inset: 0; background: #070d1a;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999; padding: 20px;
+
+.setup-box {
+  background: linear-gradient(135deg, #1a1a2e, #0d1628);
+  border: 1px solid #e8c97e55; border-radius: 20px; padding: 32px;
+  max-width: 520px; width: 100%; text-align: center;
+
+.setup-logo { font-size: 52px; margin-bottom: 12px; }
+.setup-title { font-size: 24px; font-weight: 800; color: #e8c97e; margin-bottom: 8px; }
+.setup-sub { font-size: 14px; color: #a0b4cc; margin-bottom: 28px; line-height: 1.6; }
+.setup-step { background: #0a1628; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; text-align: right; border: 1px solid #1a2a3e; }
+.setup-step-num { font-size: 11px; color: #e8c97e; font-weight: 700; margin-bottom: 4px; }
+.setup-step-text { font-size: 13px; color: #c0d0e0; line-height: 1.5; }
+.setup-step a { color: #4a90d9; }
+.setup-input-label { font-size: 13px; color: #a0b4cc; margin-bottom: 6px; text-align: right; margin-top: 16px; }
+.setup-input { font-size: 13px; font-family: monospace; direction: ltr; text-align: left; }
+.setup-btn { margin-top: 16px; padding: 14px 28px; font-size: 16px; font-weight: 700; width: 100%; border-radius: 12px; }
+@media (max-width: 600px) {
+  .grid4 { grid-template-columns: 1fr 1fr; }
+  .grid5 { grid-template-columns: 1fr 1fr; }
+  .grid6 { grid-template-columns: 1fr 1fr 1fr; }
+  .grid2 { grid-template-columns: 1fr; }
+  .grid3 { grid-template-columns: 1fr 1fr; }
+  .header-title { font-size: 17px; }
+
+</style>
+</head>
+<body>
+
+<!-- ===== SETUP SCREEN ===== -->
+<div id="setupScreen">
+  <div class="setup-box">
+    <div class="setup-logo">🕯️</div>
+    <div class="setup-title">ניהול שבתות אירוח</div>
+    <div class="setup-sub">הגדרה חד-פעמית של Firebase לסנכרון אוטומטי בין כל המכשירים שלך</div>
+
+    <div class="setup-step">
+      <div class="setup-step-num">צעד 1</div>
+      <div class="setup-step-text">כנס ל-<a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> עם חשבון Google שלך</div>
+    </div>
+    <div class="setup-step">
+      <div class="setup-step-num">צעד 2</div>
+      <div class="setup-step-text">לחץ <strong style="color:#e8c97e">Add project</strong> → תן שם (לדוג. shabbat-manager) → Continue → Create project</div>
+    </div>
+    <div class="setup-step">
+      <div class="setup-step-num">צעד 3</div>
+      <div class="setup-step-text">בתפריט הצד בחר <strong style="color:#e8c97e">Realtime Database</strong> → Create database → בחר <strong style="color:#e8c97e">Start in test mode</strong> → Enable</div>
+    </div>
+    <div class="setup-step">
+      <div class="setup-step-num">צעד 4</div>
+      <div class="setup-step-text">העתק את ה-URL שמופיע למעלה. נראה כך:<br><span style="color:#7bff9e;font-family:monospace;font-size:12px">https://shabbat-manager-xxxxx-default-rtdb.firebaseio.com</span></div>
+    </div>
+
+    <div class="setup-input-label">הדבק כאן את ה-Database URL:</div>
+    <input type="text" id="firebaseUrlInput" class="setup-input" placeholder="https://your-project-default-rtdb.firebaseio.com">
+    <div id="setupError" style="color:#ff7b7b;font-size:12px;margin-top:8px;display:none"></div>
+    <button class="btn-gold setup-btn" onclick="setupFirebase()">✅ התחל לעבוד</button>
+
+    <div style="margin-top:16px;font-size:12px;color:#555">
+      כבר הגדרת פעם? הכנס את אותו URL ←
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="mainApp" class="hidden">
+
+<div class="header">
+  <div>
+    <div class="header-title">🕯️ ניהול שבתות אירוח</div>
+    <div class="header-sub" id="countLabel">0 שבתות רשומות</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="btn-gold" onclick="openNewForm()">+ שבת חדשה</button>
+  </div>
+</div>
+
+<div class="sync-bar">
+  <span id="syncDot">⬤</span>
+  <span id="syncMsg" style="color:#a0b4cc">מתחבר...</span>
+  <span id="syncTime" style="color:#444;font-size:11px;margin-right:auto"></span>
+  <button onclick="showChangeUrl()" style="background:none;border:none;color:#444;font-size:11px;padding:0;cursor:pointer">שנה URL</button>
+</div>
+
+<div style="padding:8px 16px;background:#0a0f1e;border-bottom:1px solid #1a2a3e">
+  <input type="text" id="globalSearch" placeholder="🔍 חפש בכל הנתונים — שבתות, הכנסות, הוצאות..." oninput="doSearch()" style="width:100%;padding:10px 14px;font-size:14px;background:#0d1628;border:1px solid #2a4a6e;border-radius:10px;color:#e8e8f0;direction:rtl;font-family:inherit">
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('shabbatot',this)">שבתות</button>
+  <button class="tab-btn" onclick="switchTab('finances',this)">כספים שלי</button>
+  <button class="tab-btn" onclick="switchTab('settings',this)">הגדרות</button>
+</div>
+
+<div class="content">
+
+<div id="tab-shabbatot">
+  <div id="shabbatotList"></div>
+  <div id="emptyState" class="empty-state hidden">
+    <div style="font-size:48px">🕯️</div>
+    <div style="font-size:18px;margin-top:12px">אין שבתות עדיין</div>
+    <div style="font-size:14px;margin-top:6px">לחץ על "+ שבת חדשה" להוספה</div>
+  </div>
+</div>
+
+<div id="tab-finances" class="hidden">
+  <div class="grid4" style="margin-bottom:16px" id="finSummary"></div>
+  <div class="grid2" style="margin-bottom:16px">
+    <div class="section-card">
+      <div class="section-title">💵 תשלומים שקיבלתי</div>
+      <div id="receivedList"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input type="number" id="receiveAmt" placeholder="סכום" style="flex:1">
+        <input type="text" id="receiveNote" placeholder="הערה" style="flex:2">
+        <button class="btn-green" onclick="addReceived()">+ הוסף</button>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-title">🧾 הוצאות לקיזוז</div>
+      <div id="expensesList"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <input type="text" id="expDesc" placeholder="תיאור" style="flex:2">
+        <input type="number" id="expAmt" placeholder="סכום" style="flex:1">
+        <button class="btn-red" onclick="addExpense()">+ הוסף</button>
+      </div>
+    </div>
+  </div>
+  <button class="btn-wa" onclick="generateWA()" style="width:100%;padding:14px;font-size:16px;border-radius:12px">
+    📲 שלח דוח לנרקיס ב-WhatsApp
+  </button>
+</div>
+
+<div id="tab-settings" class="hidden">
+  <div class="section-card">
+    <div class="section-title">⚙️ הגדרות ברירת מחדל</div>
+    <div class="grid3" id="settingsFields"></div>
+  </div>
+  <div class="section-card" style="margin-top:14px">
+    <div class="section-title">☁️ סנכרון Firebase</div>
+    <div style="font-size:13px;color:#a0b4cc;margin-bottom:10px">הנתונים מסתנכרנים בזמן אמת בין כל המכשירים שפתחו את הקובץ עם אותו Firebase URL.</div>
+    <div id="currentUrlDisplay" style="font-family:monospace;font-size:12px;color:#7bff9e;background:#0a1628;padding:8px;border-radius:8px;word-break:break-all"></div>
+    <button onclick="showChangeUrl()" class="btn-blue" style="margin-top:10px">🔧 שנה Firebase URL</button>
+  </div>
+  <div class="section-card" style="margin-top:14px">
+    <div class="section-title">💾 גיבוי ידני</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-blue" onclick="exportBackup()">⬇️ ייצוא JSON</button>
+      <label class="btn-green" style="cursor:pointer;padding:8px 14px;border-radius:10px;font-size:14px">
+        ⬆️ ייבוא JSON
+        <input type="file" accept=".json" style="display:none;width:auto" onchange="importBackup(event)">
+      </label>
+    </div>
+  </div>
+</div>
+
+<div id="searchResults" class="hidden" style="padding:16px;max-width:900px;margin:0 auto"></div>
+
+</div><!-- content -->
+</div><!-- mainApp -->
+
+<!-- FORM MODAL -->
+<div id="formModal" class="modal-overlay hidden" onclick="closeFormOutside(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div style="font-size:20px;font-weight:700;color:#e8c97e;margin-bottom:16px" id="formTitle">➕ שבת חדשה</div>
+
+    <div class="grid2">
+      <div>
+        <div class="field-label">תאריך שבת</div>
+        <input type="date" id="fDate" oninput="onDateChange()">
+      </div>
+      <div>
+        <div class="field-label">פרשת השבוע</div>
+        <input type="text" id="fParasha" placeholder="אוטומטי לפי תאריך">
+      </div>
+    </div>
+    <div>
+      <div class="field-label">שם המזמין</div>
+      <input type="text" id="fHost" placeholder="שם המזמין">
+    </div>
+    <div class="grid3" style="margin-top:4px">
+      <div>
+        <div class="field-label">סוג</div>
+        <select id="fType" onchange="updateCalc()">
+          <option value="basic" id="optBasic">בסיסי</option>
+          <option value="premium" id="optPremium">פרימיום</option>
+        </select>
+      </div>
+      <div>
+        <div class="field-label">חדרי פרימיום נוספים (×₪500)</div>
+        <select id="fPremRooms" onchange="updateCalc()">
+          <option value="0">ללא</option>
+          <option value="1">1 חדר (+₪500)</option>
+          <option value="2">2 חדרים (+₪1,000)</option>
+          <option value="3">3 חדרים (+₪1,500)</option>
+          <option value="4">4 חדרים (+₪2,000)</option>
+          <option value="5">5 חדרים (+₪2,500)</option>
+        </select>
+      </div>
+      <div>
+        <div class="field-label">הנחה (₪)</div>
+        <input type="number" id="fDiscount" value="0" oninput="updateCalc()">
+      </div>
+    </div>
+
+    <div style="border-top:1px solid #e8c97e22;margin:14px 0;padding-top:14px">
+      <div class="section-title">💰 מקדמה</div>
+      <div class="grid3">
+        <div>
+          <div class="field-label">סכום מקדמה</div>
+          <input type="number" id="fAdvance" oninput="updateCalc()">
+        </div>
+        <div>
+          <div class="field-label">אהרון (מקדמה)</div>
+          <input type="number" id="fAharonAdv">
+        </div>
+        <div>
+          <div class="field-label">מלכיאל (מקדמה)</div>
+          <input type="number" id="fMalchielAdv">
+        </div>
+      </div>
+      <div class="grid2" style="margin-top:8px">
+        <div style="display:flex;align-items:center;gap:10px;padding-top:18px">
+          <input type="checkbox" id="fAdvPaid" style="width:20px;height:20px">
+          <label for="fAdvPaid" style="color:#a0b4cc;cursor:pointer">מקדמה שולמה</label>
+        </div>
+        <div>
+          <div class="field-label">תאריך מקדמה</div>
+          <input type="date" id="fAdvDate">
+        </div>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid #e8c97e22;margin-bottom:14px;padding-top:14px">
+      <div class="section-title">👥 יתרה - חלוקה לעובדים</div>
+      <div class="grid3">
+        <div>
+          <div class="field-label">ישראל מאיר</div>
+          <input type="number" id="fIsrael" oninput="updateCalc()">
+        </div>
+        <div>
+          <div class="field-label">עידו</div>
+          <input type="number" id="fIdo" oninput="updateCalc()">
+        </div>
+        <div>
+          <div class="field-label">נחמן</div>
+          <input type="number" id="fNachman" oninput="updateCalc()">
+        </div>
+      </div>
+      <div style="background:#0a1020;border:1px solid #e8c97e22;border-radius:8px;padding:10px;margin-top:10px;font-size:12px;color:#a0b4cc">
+        ℹ️ היתרה שנשארת אחרי העובדים מתחלקת אוטומטית 50/50 בין אהרון למלכיאל
+      </div>
+      <div class="calc-preview">
+        <div class="grid6">
+          <div class="stat-box"><div class="stat-label">מחיר סופי</div><div class="stat-val" id="cPrice">₪0</div></div>
+          <div class="stat-box"><div class="stat-label">יתרה (אחרי מקדמה)</div><div class="stat-val" id="cBalance">₪0</div></div>
+          <div class="stat-box"><div class="stat-label">לעובדים</div><div class="stat-val" id="cWorkers">₪0</div></div>
+          <div class="stat-box"><div class="stat-label">נשאר לחלוקה</div><div class="stat-val" id="cRemainder">₪0</div></div>
+          <div class="stat-box"><div class="stat-label">אהרון (יתרה)</div><div class="stat-val" id="cAharon" style="color:#a0b4cc">₪0</div></div>
+          <div class="stat-box" style="border:1px solid #e8c97e44"><div class="stat-label">מלכיאל (יתרה)</div><div class="stat-val" id="cMalchiel" style="color:#e8c97e">₪0</div></div>
+        </div>
+      </div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+        <input type="checkbox" id="fFinalPaid" style="width:20px;height:20px">
+        <label for="fFinalPaid" style="color:#a0b4cc;cursor:pointer">תשלום סופי שולם</label>
+      </div>
+    </div>
+
+    <div>
+      <div class="field-label">הערות</div>
+      <textarea id="fNotes" style="height:60px;resize:vertical"></textarea>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
+      <button class="btn-gray" onclick="closeForm()">ביטול</button>
+      <button class="btn-gold" onclick="saveForm()">💾 שמור</button>
+    </div>
+  </div>
+</div>
+
+<!-- WA MODAL -->
+<div id="waModal" class="modal-overlay hidden" onclick="closeWA()">
+  <div class="modal-box" style="max-width:500px" onclick="event.stopPropagation()">
+    <div style="font-size:18px;font-weight:700;color:#25d366;margin-bottom:12px">📲 דוח לנרקיס</div>
+    <textarea id="waText" readonly style="height:300px;width:100%;font-size:12px;font-family:monospace;direction:rtl"></textarea>
+    <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn-blue" onclick="copyWA()">📋 העתק</button>
+      <button class="btn-wa" onclick="openWA()">פתח WhatsApp</button>
+      <button class="btn-red" onclick="closeWA()">סגור</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// PARSHIOT — Friday dates
+// ============================================================
+const PARSHIOT = [
+  {name:"בראשית",date:"2024-10-26"},{name:"נח",date:"2024-11-02"},{name:"לך לך",date:"2024-11-09"},
+  {name:"וירא",date:"2024-11-16"},{name:"חיי שרה",date:"2024-11-23"},{name:"תולדות",date:"2024-11-30"},
+  {name:"ויצא",date:"2024-12-07"},{name:"וישלח",date:"2024-12-14"},{name:"וישב",date:"2024-12-21"},
+  {name:"מקץ",date:"2024-12-28"},{name:"ויגש",date:"2025-01-03"},{name:"ויחי",date:"2025-01-10"},
+  {name:"שמות",date:"2025-01-17"},{name:"וארא",date:"2025-01-24"},{name:"בא",date:"2025-01-31"},
+  {name:"בשלח",date:"2025-02-07"},{name:"יתרו",date:"2025-02-14"},{name:"משפטים",date:"2025-02-21"},
+  {name:"תרומה",date:"2025-02-28"},{name:"תצוה",date:"2025-03-07"},{name:"כי תשא",date:"2025-03-14"},
+  {name:"ויקהל-פקודי",date:"2025-03-21"},{name:"ויקרא",date:"2025-03-28"},{name:"צו",date:"2025-04-04"},
+  {name:"שמיני",date:"2025-04-25"},{name:"תזריע-מצורע",date:"2025-05-02"},{name:"אחרי מות-קדושים",date:"2025-05-09"},
+  {name:"אמור",date:"2025-05-16"},{name:"בהר-בחוקותי",date:"2025-05-23"},{name:"במדבר",date:"2025-05-30"},
+  {name:"נשא",date:"2025-06-06"},{name:"בהעלותך",date:"2025-06-13"},{name:"שלח",date:"2025-06-20"},
+  {name:"קרח",date:"2025-06-27"},{name:"חקת",date:"2025-07-04"},{name:"בלק",date:"2025-07-11"},
+  {name:"פינחס",date:"2025-07-18"},{name:"מטות-מסעי",date:"2025-07-25"},{name:"דברים",date:"2025-08-01"},
+  {name:"ואתחנן",date:"2025-08-08"},{name:"עקב",date:"2025-08-15"},{name:"ראה",date:"2025-08-22"},
+  {name:"שופטים",date:"2025-08-29"},{name:"כי תצא",date:"2025-09-05"},{name:"כי תבוא",date:"2025-09-12"},
+  {name:"נצבים-וילך",date:"2025-09-19"},{name:"האזינו",date:"2025-10-03"},{name:"וזאת הברכה",date:"2025-10-10"},
+  {name:"בראשית",date:"2025-10-17"},{name:"נח",date:"2025-10-24"},{name:"לך לך",date:"2025-10-31"},
+  {name:"וירא",date:"2025-11-07"},{name:"חיי שרה",date:"2025-11-14"},{name:"תולדות",date:"2025-11-21"},
+  {name:"ויצא",date:"2025-11-28"},{name:"וישלח",date:"2025-12-05"},{name:"וישב",date:"2025-12-12"},
+  {name:"מקץ",date:"2025-12-19"},{name:"ויגש",date:"2025-12-26"},{name:"ויחי",date:"2026-01-02"},
+  {name:"שמות",date:"2026-01-09"},{name:"וארא",date:"2026-01-16"},{name:"בא",date:"2026-01-23"},
+  {name:"בשלח",date:"2026-01-30"},{name:"יתרו",date:"2026-02-06"},{name:"משפטים",date:"2026-02-13"},
+  {name:"תרומה",date:"2026-02-20"},{name:"תצוה",date:"2026-02-27"},{name:"כי תשא",date:"2026-03-06"},
+  {name:"ויקהל",date:"2026-03-13"},{name:"פקודי",date:"2026-03-20"},{name:"ויקרא",date:"2026-03-27"}
+];
+
+function getParasha(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  const day = d.getDay();
+  // find the Friday of that week (Shabbat eve)
+  const daysToFri = day === 6 ? 6 : (5 - day + 7) % 7;
+  const fri = new Date(d);
+  fri.setDate(d.getDate() + daysToFri);
+  const friStr = fri.toISOString().slice(0,10);
+  // find closest parasha whose Friday <= this Friday
+  let best = PARSHIOT[0];
+  for (const p of PARSHIOT) {
+    if (p.date <= friStr) best = p;
+    else break;
+  }
+  // if the next parasha's Friday matches exactly, use that
+  for (const p of PARSHIOT) {
+    if (p.date === friStr) { best = p; break; }
+  }
+  return best.name;
+
+
+// ============================================================
+// FIREBASE
+// ============================================================
+let DB_URL = "https://shabatot-e1a79-default-rtdb.firebaseio.com";
+let firebaseListenerActive = false;
+let lastPushedData = '';
+
+function getApiUrl(path) {
+  return DB_URL.replace(/\/$/, '') + path + '.json';
+
+
+async function fbGet(path) {
+  const r = await fetch(getApiUrl(path));
+  if (!r.ok) throw new Error('Firebase GET error ' + r.status);
+  return r.json();
+
+
+async function fbSet(path, data) {
+  const r = await fetch(getApiUrl(path), {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!r.ok) throw new Error('Firebase PUT error ' + r.status);
+  return r.json();
+
+
+// Real-time listener using SSE (Firebase streaming)
+let sseSource = null;
+function startFirebaseListener() {
+  if (sseSource) sseSource.close();
+  try {
+    sseSource = new EventSource(getApiUrl('/shabbat_data') + '?auth=');
+    sseSource.addEventListener('put', (e) => {
+      try {
+        const payload = JSON.parse(e.data);
+        if (payload.data && JSON.stringify(payload.data) !== lastPushedData) {
+          applyRemoteData(payload.data);
+          setSyncStatus('live', '🟢 מסונכרן');
+        }
+      } catch(err) {}
+    });
+    sseSource.onerror = () => setSyncStatus('warn', '🟡 בעיית חיבור - מנסה שוב...');
+    sseSource.onopen = () => setSyncStatus('live', '🟢 מחובר ומסתנכרן בזמן אמת');
+  } catch(e) { setSyncStatus('warn', '🟡 SSE לא נתמך - פולינג'); startPolling(); }
+
+
+let pollInterval = null;
+function startPolling() {
+  if (pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(async () => {
+    try {
+      const remote = await fbGet('/shabbat_data');
+      if (remote && JSON.stringify(remote) !== lastPushedData) {
+        applyRemoteData(remote);
+        setSyncStatus('live', '🟢 מסונכרן');
+      }
+    } catch(e) { setSyncStatus('warn', '🟡 בעיית חיבור'); }
+  }, 8000);
+
+
+function applyRemoteData(remoteData) {
+  const remoteMod = remoteData.lastModified || 0;
+  const localMod = D.lastModified || 0;
+  if (remoteMod > localMod) {
+    D = remoteData;
+    localStorage.setItem('shabbat_local', JSON.stringify(D));
+    renderAll();
+    const finTab = document.getElementById('tab-finances');
+    if (finTab && !finTab.classList.contains('hidden')) renderFinances();
+    const setTab = document.getElementById('tab-settings');
+    if (setTab && !setTab.classList.contains('hidden')) renderSettings();
+    setSyncStatus('live', '🟢 עודכן ממכשיר אחר');
+  }
+
+
+async function pushToFirebase() {
+  try {
+    const str = JSON.stringify(D);
+    lastPushedData = str;
+    await fbSet('/shabbat_data', D);
+    setSyncStatus('live', '🟢 נשמר בענן');
+    document.getElementById('syncTime').textContent = new Date().toLocaleTimeString('he-IL');
+  } catch(e) {
+    setSyncStatus('warn', '🟡 לא נשמר בענן - שמור מקומית');
+  }
+
+
+function setSyncStatus(type, msg) {
+  const dot = document.getElementById('syncDot');
+  const msgEl = document.getElementById('syncMsg');
+  if (!dot || !msgEl) return;
+  const colors = { live: '#7bff9e', warn: '#ffcc44', error: '#ff7b7b' };
+  dot.style.color = colors[type] || '#a0b4cc';
+  msgEl.textContent = msg;
+  msgEl.style.color = colors[type] || '#a0b4cc';
+
+
+// ============================================================
+// DATA
+// ============================================================
+function getDefaults() {
+  return {
+    shabbatot: [], received: [], expenses: [],
+    settings: {
+      base_price: 13000, premium_price: 16000, prem_room_price: 500,
+      advance: 5000, aharon_adv: 2500, malchiel_adv: 2500,
+      israel_meir: 1000, ido: 500, nachman: 1700
+    },
+    lastModified: Date.now()
+  };
+
+
+let D = JSON.parse(localStorage.getItem('shabbat_local') || 'null') || getDefaults();
+let editId = null;
+let currentTab = 'shabbatot';
+
+function saveLocal() {
+  D.lastModified = Date.now();
+  localStorage.setItem('shabbat_local', JSON.stringify(D));
+
+
+function saveAndSync() {
+  saveLocal();
+  pushToFirebase();
+
+
+function fmt(n) { return '₪' + Number(n||0).toLocaleString('he-IL'); }
+
+function calcShabbat(s) {
+  const st = D.settings;
+  const baseP = s.type === 'premium' ? st.premium_price : st.base_price;
+  const premExtra = (s.prem_rooms || 0) * (st.prem_room_price || 500);
+  const price = baseP + premExtra;
+  const discounted = price - (s.discount || 0);
+  const advance = s.advance_amount != null ? s.advance_amount : st.advance;
+  const balance = discounted - advance;
+  const workers = (s.israel_meir != null ? s.israel_meir : st.israel_meir)
+                + (s.ido != null ? s.ido : st.ido)
+                + (s.nachman != null ? s.nachman : st.nachman);
+  const remainder = balance - workers;
+  const aharon_bal = Math.floor(remainder / 2);
+  const malchiel_bal = remainder - aharon_bal;
+  return { price, discounted, advance, balance, workers, remainder, aharon_bal, malchiel_bal };
+
+
+// ============================================================
+// SETUP
+// ============================================================
+function setupFirebase() {
+  let url = document.getElementById('firebaseUrlInput').value.trim();
+  const errEl = document.getElementById('setupError');
+  if (!url) { errEl.textContent = 'נא להכניס URL'; errEl.style.display='block'; return; }
+  if (!url.startsWith('https://')) { errEl.textContent = 'ה-URL צריך להתחיל ב-https://'; errEl.style.display='block'; return; }
+  url = url.replace(/\/$/, '');
+  errEl.style.display = 'none';
+  localStorage.setItem('firebase_url', url);
+  DB_URL = url;
+launchApp();
+
+
+function showChangeUrl() {
+  const url = prompt('הכנס Firebase URL חדש:', DB_URL);
+  if (url && url.startsWith('https://')) {
+    DB_URL = url.replace(/\/$/, '');
+    localStorage.setItem('firebase_url', DB_URL);
+    document.getElementById('currentUrlDisplay').textContent = DB_URL;
+    if (sseSource) sseSource.close();
+    if (pollInterval) clearInterval(pollInterval);
+    startFirebaseListener();
+    pushToFirebase();
+  }
+
+
+async function launchApp() {
+  document.getElementById('setupScreen').classList.add('hidden');
+  document.getElementById('mainApp').classList.remove('hidden');
+  document.getElementById('currentUrlDisplay').textContent = DB_URL;
+
+  setSyncStatus('warn', '🟡 מתחבר לענן...');
+
+  // Try to pull existing data first
+  try {
+    const remote = await fbGet('/shabbat_data');
+    if (remote && remote.shabbatot) {
+      D = remote;
+      saveLocal();
+      setSyncStatus('live', '🟢 נטען מהענן');
+    
+      // First time — push local
+      await pushToFirebase();
+    }
+  } catch(e) {
+    setSyncStatus('warn', '🟡 עובד ללא ענן כרגע');
+  }
+
+  renderAll();
+  startFirebaseListener();
+
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(id, btn) {
+  currentTab = id;
+  document.getElementById('searchResults').classList.add('hidden');
+  document.getElementById('globalSearch').value = '';
+  ['shabbatot','finances','settings'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('hidden', t !== id);
+  });
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (id === 'finances') renderFinances();
+  if (id === 'settings') renderSettings();
+
+
+// ============================================================
+// RENDER
+// ============================================================
+function renderAll() {
+  const sorted = [...(D.shabbatot||[])].sort((a,b) => new Date(b.date) - new Date(a.date));
+  const list = document.getElementById('shabbatotList');
+  const empty = document.getElementById('emptyState');
+  if (!list) return;
+  document.getElementById('countLabel').textContent = sorted.length + ' שבתות רשומות';
+  if (!sorted.length) { list.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  list.innerHTML = sorted.map(s => renderCard(s)).join('');
+
+
+function renderCard(s) {
+  const c = calcShabbat(s);
+  const ma = s.malchiel_adv != null ? s.malchiel_adv : D.settings.malchiel_adv;
+  const aa_adv = s.aharon_adv != null ? s.aharon_adv : D.settings.aharon_adv;
+  const im = s.israel_meir != null ? s.israel_meir : D.settings.israel_meir;
+  const ido = s.ido != null ? s.ido : D.settings.ido;
+  const na = s.nachman != null ? s.nachman : D.settings.nachman;
+  const debtLeft = c.discounted - (s.advance_paid ? c.advance : 0) - (s.final_paid ? c.balance : 0);
+  const barColor = s.type === 'premium' ? 'linear-gradient(90deg,#e8c97e,#f5e4a6)' : 'linear-gradient(90deg,#4a90d9,#7ab8f5)';
+  const premRooms = s.prem_rooms || 0;
+  const typeLabel = s.type === 'premium'
+    ? ('פרימיום 👑' + (premRooms > 0 ? ' + ' + premRooms + ' חדרים' : ''))
+    : ('בסיסי' + (premRooms > 0 ? ' + ' + premRooms + ' חדר פרימיום 🛏️' : ''));
+
+  return '<div class="card">' +
+    '<div class="card-top-bar" style="background:' + barColor + '"></div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">' +
+      '<div>' +
+        '<div style="font-size:19px;font-weight:700;color:#e8c97e;margin-bottom:2px">פרשת ' + (s.parasha||'—') + '</div>' +
+        '<div style="color:#a0b4cc;font-size:13px">' + (s.date||'') + ' | מזמין: <span style="color:#fff">' + (s.host_name||'—') + '</span></div>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px">' +
+        '<button class="btn-blue btn-tiny" onclick="openEdit(\'' + s.id + '\')">✏️ ערוך</button>' +
+        '<button class="btn-red btn-tiny" onclick="deleteShabbat(\'' + s.id + '\')">🗑</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="grid3" style="margin-bottom:12px">' +
+      '<div class="stat-box"><div class="stat-label">סוג</div><div class="stat-val" style="font-size:12px">' + typeLabel + '</div></div>' +
+      '<div class="stat-box"><div class="stat-label">מחיר סופי</div><div class="stat-val">' + fmt(c.discounted) + '</div>' + (s.discount?'<div class="stat-sub">הנחה '+fmt(s.discount)+'</div>':'') + '</div>' +
+      '<div class="stat-box"><div class="stat-label">יתרת חוב</div><div class="stat-val" style="color:' + (debtLeft>0?'#ff7b7b':'#7bff9e') + '">' + fmt(debtLeft) + '</div></div>' +
+    '</div>' +
+    '<div class="grid2" style="margin-bottom:10px">' +
+      '<div class="pay-box" style="background:' + (s.advance_paid?'#0a2e1a':'#1a0a0a') + ';border:1px solid ' + (s.advance_paid?'#7bff9e44':'#ff7b7b44') + '" onclick="togglePay(\'' + s.id + '\',\'advance\')">' +
+        '<div style="font-size:12px;color:#a0b4cc;margin-bottom:3px">מקדמה</div>' +
+        '<div style="font-size:16px;font-weight:700;color:' + (s.advance_paid?'#7bff9e':'#ff7b7b') + '">' + fmt(c.advance) + '</div>' +
+        '<div style="font-size:11px;color:' + (s.advance_paid?'#7bff9e':'#ff7b7b') + '">' + (s.advance_paid?'✅ שולם '+(s.advance_date||''):'⏳ ממתין — לחץ לאישור') + '</div>' +
+      '</div>' +
+      '<div class="pay-box" style="background:' + (s.final_paid?'#0a2e1a':'#1a0a0a') + ';border:1px solid ' + (s.final_paid?'#7bff9e44':'#ff7b7b44') + '" onclick="togglePay(\'' + s.id + '\',\'final\')">' +
+        '<div style="font-size:12px;color:#a0b4cc;margin-bottom:3px">תשלום סופי</div>' +
+        '<div style="font-size:16px;font-weight:700;color:' + (s.final_paid?'#7bff9e':'#ff7b7b') + '">' + fmt(c.balance) + '</div>' +
+        '<div style="font-size:11px;color:' + (s.final_paid?'#7bff9e':'#ff7b7b') + '">' + (s.final_paid?'✅ שולם':'⏳ ממתין — לחץ לאישור') + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="border-top:1px solid #e8c97e22;padding-top:10px">' +
+      '<div style="font-size:11px;color:#a0b4cc;margin-bottom:8px">חלוקת תשלומים:</div>' +
+      '<div class="grid5" style="margin-bottom:8px">' +
+        '<div class="mini-worker"><div class="mini-worker-label">אהרון (מקד׳)</div><div class="mini-worker-val">' + fmt(aa_adv) + '</div></div>' +
+        '<div class="mini-worker" style="border:1px solid #e8c97e33"><div class="mini-worker-label">מלכיאל (מקד׳)</div><div class="mini-worker-val" style="color:#e8c97e">' + fmt(ma) + '</div></div>' +
+        '<div class="mini-worker"><div class="mini-worker-label">ישראל מאיר</div><div class="mini-worker-val">' + fmt(im) + '</div></div>' +
+        '<div class="mini-worker"><div class="mini-worker-label">עידו</div><div class="mini-worker-val">' + fmt(ido) + '</div></div>' +
+        '<div class="mini-worker"><div class="mini-worker-label">נחמן</div><div class="mini-worker-val">' + fmt(na) + '</div></div>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+        '<div style="display:flex;justify-content:space-between;background:#0a1628;border-radius:8px;padding:7px 10px">' +
+          '<span style="color:#a0b4cc;font-size:12px">אהרון (יתרה):</span>' +
+          '<span style="font-weight:700;color:#a0b4cc">' + fmt(c.aharon_bal) + '</span>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;background:#0a0a1a;border:1px solid #e8c97e33;border-radius:8px;padding:7px 10px">' +
+          '<span style="color:#a0b4cc;font-size:12px">מלכיאל (יתרה):</span>' +
+          '<span style="font-weight:700;color:#e8c97e">' + fmt(c.malchiel_bal) + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+
+
+function togglePay(id, type) {
+  const s = D.shabbatot.find(x => x.id === id);
+  if (!s) return;
+  if (type === 'advance') s.advance_paid = !s.advance_paid;
+  else s.final_paid = !s.final_paid;
+  saveAndSync(); renderAll();
+
+
+function deleteShabbat(id) {
+  if (!confirm('למחוק שבת זו?')) return;
+  D.shabbatot = D.shabbatot.filter(s => s.id !== id);
+  saveAndSync(); renderAll();
+
+
+// ============================================================
+// FORM
+// ============================================================
+function openNewForm() {
+  editId = null;
+  document.getElementById('formTitle').textContent = '➕ שבת חדשה';
+  const st = D.settings;
+  setFormVal('fDate',''); setFormVal('fParasha',''); setFormVal('fHost','');
+  document.getElementById('fType').value = 'basic';
+  document.getElementById('fPremRooms').value = '0';
+  setFormVal('fDiscount', 0);
+  setFormVal('fAdvance', st.advance);
+  setFormVal('fAharonAdv', st.aharon_adv);
+  setFormVal('fMalchielAdv', st.malchiel_adv);
+  document.getElementById('fAdvPaid').checked = false;
+  setFormVal('fAdvDate','');
+  setFormVal('fIsrael', st.israel_meir);
+  setFormVal('fIdo', st.ido);
+  setFormVal('fNachman', st.nachman);
+  document.getElementById('fFinalPaid').checked = false;
+  setFormVal('fNotes','');
+  updateTypeOptions(); updateCalc();
+  document.getElementById('formModal').classList.remove('hidden');
+
+
+function openEdit(id) {
+  const s = D.shabbatot.find(x => x.id === id);
+  if (!s) return;
+  editId = id;
+  document.getElementById('formTitle').textContent = '✏️ עריכת שבת';
+  const st = D.settings;
+  setFormVal('fDate', s.date||'');
+  setFormVal('fParasha', s.parasha||'');
+  setFormVal('fHost', s.host_name||'');
+  document.getElementById('fType').value = s.type||'basic';
+  document.getElementById('fPremRooms').value = String(s.prem_rooms||0);
+  setFormVal('fDiscount', s.discount||0);
+  setFormVal('fAdvance', s.advance_amount != null ? s.advance_amount : st.advance);
+  setFormVal('fAharonAdv', s.aharon_adv != null ? s.aharon_adv : st.aharon_adv);
+  setFormVal('fMalchielAdv', s.malchiel_adv != null ? s.malchiel_adv : st.malchiel_adv);
+  document.getElementById('fAdvPaid').checked = !!s.advance_paid;
+  setFormVal('fAdvDate', s.advance_date||'');
+  setFormVal('fIsrael', s.israel_meir != null ? s.israel_meir : st.israel_meir);
+  setFormVal('fIdo', s.ido != null ? s.ido : st.ido);
+  setFormVal('fNachman', s.nachman != null ? s.nachman : st.nachman);
+  document.getElementById('fFinalPaid').checked = !!s.final_paid;
+  setFormVal('fNotes', s.notes||'');
+  updateTypeOptions(); updateCalc();
+  document.getElementById('formModal').classList.remove('hidden');
+
+
+function setFormVal(id, val) { const el = document.getElementById(id); if(el) el.value = val; }
+
+function updateTypeOptions() {
+  const st = D.settings;
+  document.getElementById('optBasic').textContent = 'בסיסי - ' + fmt(st.base_price);
+  document.getElementById('optPremium').textContent = 'פרימיום - ' + fmt(st.premium_price);
+
+
+function onDateChange() {
+  const date = document.getElementById('fDate').value;
+  document.getElementById('fParasha').value = getParasha(date);
+
+
+function updateCalc() {
+  const st = D.settings;
+  const type = document.getElementById('fType').value;
+  const baseP = type === 'premium' ? st.premium_price : st.base_price;
+  const premRooms = +document.getElementById('fPremRooms').value || 0;
+  const price = baseP + premRooms * (st.prem_room_price || 500);
+  const discount = +document.getElementById('fDiscount').value || 0;
+  const discounted = price - discount;
+  const advance = +document.getElementById('fAdvance').value || 0;
+  const balance = discounted - advance;
+  const workers = (+document.getElementById('fIsrael').value||0)
+                + (+document.getElementById('fIdo').value||0)
+                + (+document.getElementById('fNachman').value||0);
+  const remainder = balance - workers;
+  const aharon = Math.floor(remainder / 2);
+  const malchiel = remainder - aharon;
+  document.getElementById('cPrice').textContent = fmt(discounted);
+  document.getElementById('cBalance').textContent = fmt(balance);
+  document.getElementById('cWorkers').textContent = fmt(workers);
+  document.getElementById('cRemainder').textContent = fmt(remainder);
+  document.getElementById('cAharon').textContent = fmt(aharon);
+  document.getElementById('cMalchiel').textContent = fmt(malchiel);
+
+
+function saveForm() {
+  const s = {
+    id: editId || Date.now().toString(),
+    date: document.getElementById('fDate').value,
+    parasha: document.getElementById('fParasha').value,
+    host_name: document.getElementById('fHost').value,
+    type: document.getElementById('fType').value,
+    prem_rooms: +document.getElementById('fPremRooms').value||0,
+    discount: +document.getElementById('fDiscount').value||0,
+    advance_amount: +document.getElementById('fAdvance').value||0,
+    aharon_adv: +document.getElementById('fAharonAdv').value||0,
+    malchiel_adv: +document.getElementById('fMalchielAdv').value||0,
+    advance_paid: document.getElementById('fAdvPaid').checked,
+    advance_date: document.getElementById('fAdvDate').value,
+    israel_meir: +document.getElementById('fIsrael').value||0,
+    ido: +document.getElementById('fIdo').value||0,
+    nachman: +document.getElementById('fNachman').value||0,
+    final_paid: document.getElementById('fFinalPaid').checked,
+    notes: document.getElementById('fNotes').value,
+  };
+  if (editId) D.shabbatot = D.shabbatot.map(x => x.id === editId ? s : x);
+  else D.shabbatot.push(s);
+  saveAndSync(); renderAll(); closeForm();
+
+
+function closeForm() { document.getElementById('formModal').classList.add('hidden'); }
+function closeFormOutside(e) { if (e.target.id === 'formModal') closeForm(); }
+
+// ============================================================
+// FINANCES
+// ============================================================
+function totalMalchielEarned() {
+  let total = 0;
+  for (const s of (D.shabbatot||[])) {
+    const c = calcShabbat(s);
+    const ma = s.malchiel_adv != null ? s.malchiel_adv : D.settings.malchiel_adv;
+    if (s.advance_paid) total += ma;
+    if (s.final_paid) total += c.malchiel_bal;
+  }
+  return total;
+
+
+function renderFinances() {
+  const earned = totalMalchielEarned();
+  const received = (D.received||[]).reduce((a,r) => a+r.amount, 0);
+  const expenses = (D.expenses||[]).reduce((a,e) => a+e.amount, 0);
+  const net = earned - received - expenses;
+  document.getElementById('finSummary').innerHTML =
+    bStat('סה"כ מגיע לי', fmt(earned), '#e8c97e') +
+    bStat('קיבלתי בפועל', fmt(received), '#7bff9e') +
+    bStat('הוצאות', fmt(expenses), '#ff7b7b') +
+    bStat('יתרה לקבלה', fmt(net), net>=0?'#4a90d9':'#ff7b7b');
+  document.getElementById('receivedList').innerHTML = (D.received||[]).map((r,i) =>
+    '<div class="row-item"><span>' + r.date + (r.note?' — '+r.note:'') + '</span>' +
+    '<div style="display:flex;gap:8px;align-items:center"><span style="color:#7bff9e">' + fmt(r.amount) + '</span>' +
+    '<button class="btn-red btn-tiny" onclick="removeReceived('+i+')">✕</button></div></div>'
+  ).join('');
+  document.getElementById('expensesList').innerHTML = (D.expenses||[]).map((e,i) =>
+    '<div class="row-item"><span>' + e.date + ' — ' + e.desc + '</span>' +
+    '<div style="display:flex;gap:8px;align-items:center"><span style="color:#ff7b7b">' + fmt(e.amount) + '</span>' +
+    '<button class="btn-red btn-tiny" onclick="removeExpense('+i+')">✕</button></div></div>'
+  ).join('');
+
+
+function bStat(label, val, color) {
+  return '<div class="big-stat"><div class="big-stat-label">' + label + '</div><div class="big-stat-val" style="color:' + color + '">' + val + '</div></div>';
+
+
+function addReceived() {
+  const amt = +document.getElementById('receiveAmt').value;
+  const note = document.getElementById('receiveNote').value;
+  if (!amt) return;
+  if (!D.received) D.received = [];
+  D.received.push({ amount: amt, note, date: new Date().toLocaleDateString('he-IL') });
+  document.getElementById('receiveAmt').value = '';
+  document.getElementById('receiveNote').value = '';
+  saveAndSync(); renderFinances();
+
+function removeReceived(i) { D.received.splice(i,1); saveAndSync(); renderFinances(); }
+
+function addExpense() {
+  const amt = +document.getElementById('expAmt').value;
+  const desc = document.getElementById('expDesc').value;
+  if (!amt || !desc) return;
+  if (!D.expenses) D.expenses = [];
+  D.expenses.push({ amount: amt, desc, date: new Date().toLocaleDateString('he-IL') });
+  document.getElementById('expAmt').value = '';
+  document.getElementById('expDesc').value = '';
+  saveAndSync(); renderFinances();
+
+function removeExpense(i) { D.expenses.splice(i,1); saveAndSync(); renderFinances(); }
+
+// ============================================================
+// WHATSAPP
+// ============================================================
+function generateWA() {
+  const earned = totalMalchielEarned();
+  const received = (D.received||[]).reduce((a,r)=>a+r.amount,0);
+  const expenses = (D.expenses||[]).reduce((a,e)=>a+e.amount,0);
+  const net = earned - received - expenses;
+  let lines = ['📋 *דוח כספי - מלכיאל*',''];
+  lines.push('💰 סה"כ שמגיע לי: '+fmt(earned));
+  lines.push('✅ קיבלתי בפועל: '+fmt(received));
+  lines.push('🧾 הוצאות: '+fmt(expenses));
+  lines.push('⚖️ יתרה לקבלה: '+fmt(net));
+  lines.push('');
+  if ((D.expenses||[]).length) {
+    lines.push('📌 *פירוט הוצאות:*');
+    D.expenses.forEach(e => lines.push('• '+e.desc+': '+fmt(e.amount)+' ('+e.date+')'));
+    lines.push('');
+  }
+  lines.push('📅 *פירוט שבתות:*');
+  (D.shabbatot||[]).forEach(s => {
+    const c = calcShabbat(s);
+    lines.push('• '+(s.parasha||'')+' ('+(s.date||'')+') - '+(s.host_name||''));
+    lines.push('  מחיר: '+fmt(c.discounted)+' | מקדמה: '+(s.advance_paid?'✅':'❌')+' | סופי: '+(s.final_paid?'✅':'❌'));
+  });
+  document.getElementById('waText').value = lines.join('\n');
+  document.getElementById('waModal').classList.remove('hidden');
+
+function copyWA() { navigator.clipboard.writeText(document.getElementById('waText').value).then(()=>alert('הועתק!')); }
+function openWA() { window.open('https://wa.me/?text='+encodeURIComponent(document.getElementById('waText').value),'_blank'); }
+function closeWA() { document.getElementById('waModal').classList.add('hidden'); }
+
+// ============================================================
+// SETTINGS
+// ============================================================
+const SETTINGS_FIELDS = [
+  ['base_price','מחיר בסיסי'],['premium_price','מחיר פרימיום'],
+  ['prem_room_price','מחיר חדר פרימיום'],['advance','מקדמה'],
+  ['aharon_adv','מקדמה - אהרון'],['malchiel_adv','מקדמה - מלכיאל'],
+  ['israel_meir','ישראל מאיר'],['ido','עידו'],['nachman','נחמן']
+];
+
+function renderSettings() {
+  document.getElementById('settingsFields').innerHTML = SETTINGS_FIELDS.map(([k,label]) =>
+    '<div><div class="field-label">'+label+'</div>' +
+    '<input type="number" value="'+(D.settings[k]||0)+'" onchange="updateSetting(\''+k+'\',this.value)"></div>'
+  ).join('');
+  document.getElementById('currentUrlDisplay').textContent = DB_URL;
+
+
+function updateSetting(key, val) { D.settings[key] = +val; saveAndSync(); }
+
+function exportBackup() {
+  const blob = new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'shabbat-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+
+
+function importBackup(e) {
+  const file = e.target.files[0]; if(!file) return;
+  const r = new FileReader();
+  r.onload = ev => { try { D = JSON.parse(ev.target.result); saveAndSync(); renderAll(); alert('יובא בהצלחה!'); } catch { alert('שגיאה בייבוא'); } };
+  r.readAsText(file);
+
+
+// ============================================================
+// SEARCH
+// ============================================================
+function doSearch() {
+  const q = document.getElementById('globalSearch').value.trim().toLowerCase();
+  const resultsEl = document.getElementById('searchResults');
+
+  if (!q) {
+    resultsEl.classList.add('hidden');
+    ['shabbatot','finances','settings'].forEach(t => {
+      document.getElementById('tab-'+t).classList.toggle('hidden', t !== currentTab);
+    });
+    if (currentTab === 'finances') renderFinances();
+    if (currentTab === 'settings') renderSettings();
+    return;
+  }
+
+  ['shabbatot','finances','settings'].forEach(t => {
+    document.getElementById('tab-'+t).classList.add('hidden');
+  });
+
+  const shabMatches = (D.shabbatot||[]).filter(s =>
+    (s.parasha||'').toLowerCase().includes(q) ||
+    (s.host_name||'').toLowerCase().includes(q) ||
+    (s.date||'').includes(q) ||
+    (s.notes||'').toLowerCase().includes(q)
+  );
+  const recMatches = (D.received||[]).map((r,i) => ({...r, _i:i})).filter(r =>
+    (r.note||'').toLowerCase().includes(q) ||
+    (r.date||'').includes(q) ||
+    String(r.amount).includes(q)
+  );
+  const expMatches = (D.expenses||[]).map((e,i) => ({...e, _i:i})).filter(e =>
+    (e.desc||'').toLowerCase().includes(q) ||
+    (e.date||'').includes(q) ||
+    String(e.amount).includes(q)
+  );
+
+  let html = '';
+
+  if (shabMatches.length) {
+    html += '<div class="section-title" style="margin-bottom:10px">🕯️ שבתות (' + shabMatches.length + ')</div>';
+    html += shabMatches.map(s => renderCard(s)).join('');
+  }
+
+  if (recMatches.length) {
+    html += '<div class="section-card" style="margin-bottom:12px"><div class="section-title">💵 הכנסות (' + recMatches.length + ')</div>';
+    html += recMatches.map(r =>
+      '<div class="row-item"><span>' + (r.date||'') + (r.note?' — '+r.note:'') + '</span>' +
+      '<div style="display:flex;gap:8px;align-items:center"><span style="color:#7bff9e">' + fmt(r.amount) + '</span>' +
+      '<button class="btn-red btn-tiny" onclick="removeReceived('+r._i+');doSearch()">✕</button></div></div>'
+    ).join('');
+    html += '</div>';
+  }
+
+  if (expMatches.length) {
+    html += '<div class="section-card" style="margin-bottom:12px"><div class="section-title">🧾 הוצאות (' + expMatches.length + ')</div>';
+    html += expMatches.map(e =>
+      '<div class="row-item"><span>' + (e.date||'') + ' — ' + (e.desc||'') + '</span>' +
+      '<div style="display:flex;gap:8px;align-items:center"><span style="color:#ff7b7b">' + fmt(e.amount) + '</span>' +
+      '<button class="btn-red btn-tiny" onclick="removeExpense('+e._i+');doSearch()">✕</button></div></div>'
+    ).join('');
+    html += '</div>';
+  }
+
+  if (!html) {
+    html = '<div class="empty-state"><div style="font-size:32px">🔍</div><div style="font-size:16px;margin-top:8px">לא נמצאו תוצאות עבור "' + document.getElementById('globalSearch').value + '"</div></div>';
+  }
+
+  resultsEl.innerHTML = html;
+  resultsEl.classList.remove('hidden');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+// always launch
+launchApp();
+
+
+
+</script>
+</body>
+</html>
