@@ -82,6 +82,7 @@ button:hover { opacity: 0.85; }
 .btn-tiny { padding: 4px 8px; font-size: 11px; border-radius: 6px; }
 .empty-state { text-align: center; color: #a0b4cc; padding: 60px; }
 .calc-preview { background: #070d1a; border-radius: 10px; padding: 12px; margin-top: 10px; border: 1px solid #1a2a3e; }
+/* SETUP SCREEN */
 #setupScreen {
   position: fixed; inset: 0; background: #070d1a;
   display: flex; align-items: center; justify-content: center;
@@ -114,43 +115,8 @@ button:hover { opacity: 0.85; }
 </head>
 <body>
 
-<!-- ===== SETUP SCREEN ===== -->
-<div id="setupScreen">
-  <div class="setup-box">
-    <div class="setup-logo">🕯️</div>
-    <div class="setup-title">ניהול שבתות אירוח</div>
-    <div class="setup-sub">הגדרה חד-פעמית של Firebase לסנכרון אוטומטי בין כל המכשירים שלך</div>
-
-    <div class="setup-step">
-      <div class="setup-step-num">צעד 1</div>
-      <div class="setup-step-text">כנס ל-<a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> עם חשבון Google שלך</div>
-    </div>
-    <div class="setup-step">
-      <div class="setup-step-num">צעד 2</div>
-      <div class="setup-step-text">לחץ <strong style="color:#e8c97e">Add project</strong> → תן שם (לדוג. shabbat-manager) → Continue → Create project</div>
-    </div>
-    <div class="setup-step">
-      <div class="setup-step-num">צעד 3</div>
-      <div class="setup-step-text">בתפריט הצד בחר <strong style="color:#e8c97e">Realtime Database</strong> → Create database → בחר <strong style="color:#e8c97e">Start in test mode</strong> → Enable</div>
-    </div>
-    <div class="setup-step">
-      <div class="setup-step-num">צעד 4</div>
-      <div class="setup-step-text">העתק את ה-URL שמופיע למעלה. נראה כך:<br><span style="color:#7bff9e;font-family:monospace;font-size:12px">https://shabbat-manager-xxxxx-default-rtdb.firebaseio.com</span></div>
-    </div>
-
-    <div class="setup-input-label">הדבק כאן את ה-Database URL:</div>
-    <input type="text" id="firebaseUrlInput" class="setup-input" placeholder="https://your-project-default-rtdb.firebaseio.com">
-    <div id="setupError" style="color:#ff7b7b;font-size:12px;margin-top:8px;display:none"></div>
-    <button class="btn-gold setup-btn" onclick="setupFirebase()">✅ התחל לעבוד</button>
-
-    <div style="margin-top:16px;font-size:12px;color:#555">
-      כבר הגדרת פעם? הכנס את אותו URL ←
-    </div>
-  </div>
-</div>
-
 <!-- ===== MAIN APP ===== -->
-<div id="mainApp" class="hidden">
+<div id="mainApp">
 
 <div class="header">
   <div>
@@ -382,6 +348,7 @@ button:hover { opacity: 0.85; }
 // PARSHIOT — Friday dates
 // ============================================================
 const PARSHIOT = [
+  // 5785
   {name:"בראשית",date:"2024-10-26"},{name:"נח",date:"2024-11-02"},{name:"לך לך",date:"2024-11-09"},
   {name:"וירא",date:"2024-11-16"},{name:"חיי שרה",date:"2024-11-23"},{name:"תולדות",date:"2024-11-30"},
   {name:"ויצא",date:"2024-12-07"},{name:"וישלח",date:"2024-12-14"},{name:"וישב",date:"2024-12-21"},
@@ -389,63 +356,76 @@ const PARSHIOT = [
   {name:"שמות",date:"2025-01-17"},{name:"וארא",date:"2025-01-24"},{name:"בא",date:"2025-01-31"},
   {name:"בשלח",date:"2025-02-07"},{name:"יתרו",date:"2025-02-14"},{name:"משפטים",date:"2025-02-21"},
   {name:"תרומה",date:"2025-02-28"},{name:"תצוה",date:"2025-03-07"},{name:"כי תשא",date:"2025-03-14"},
-  {name:"ויקהל-פקודי",date:"2025-03-21"},{name:"ויקרא",date:"2025-03-28"},{name:"צו",date:"2025-04-04"},
-  {name:"שמיני",date:"2025-04-25"},{name:"תזריע-מצורע",date:"2025-05-02"},{name:"אחרי מות-קדושים",date:"2025-05-09"},
-  {name:"אמור",date:"2025-05-16"},{name:"בהר-בחוקותי",date:"2025-05-23"},{name:"במדבר",date:"2025-05-30"},
-  {name:"נשא",date:"2025-06-06"},{name:"בהעלותך",date:"2025-06-13"},{name:"שלח",date:"2025-06-20"},
-  {name:"קרח",date:"2025-06-27"},{name:"חקת",date:"2025-07-04"},{name:"בלק",date:"2025-07-11"},
-  {name:"פינחס",date:"2025-07-18"},{name:"מטות-מסעי",date:"2025-07-25"},{name:"דברים",date:"2025-08-01"},
-  {name:"ואתחנן",date:"2025-08-08"},{name:"עקב",date:"2025-08-15"},{name:"ראה",date:"2025-08-22"},
-  {name:"שופטים",date:"2025-08-29"},{name:"כי תצא",date:"2025-09-05"},{name:"כי תבוא",date:"2025-09-12"},
-  {name:"נצבים-וילך",date:"2025-09-19"},{name:"האזינו",date:"2025-10-03"},{name:"וזאת הברכה",date:"2025-10-10"},
-  {name:"בראשית",date:"2025-10-17"},{name:"נח",date:"2025-10-24"},{name:"לך לך",date:"2025-10-31"},
-  {name:"וירא",date:"2025-11-07"},{name:"חיי שרה",date:"2025-11-14"},{name:"תולדות",date:"2025-11-21"},
-  {name:"ויצא",date:"2025-11-28"},{name:"וישלח",date:"2025-12-05"},{name:"וישב",date:"2025-12-12"},
-  {name:"מקץ",date:"2025-12-19"},{name:"ויגש",date:"2025-12-26"},{name:"ויחי",date:"2026-01-02"},
-  {name:"שמות",date:"2026-01-09"},{name:"וארא",date:"2026-01-16"},{name:"בא",date:"2026-01-23"},
-  {name:"בשלח",date:"2026-01-30"},{name:"יתרו",date:"2026-02-06"},{name:"משפטים",date:"2026-02-13"},
-  {name:"תרומה",date:"2026-02-20"},{name:"תצוה",date:"2026-02-27"},{name:"כי תשא",date:"2026-03-06"},
-  {name:"ויקהל",date:"2026-03-13"},{name:"פקודי",date:"2026-03-20"},{name:"ויקרא",date:"2026-03-27"}
+  {name:"ויקהל",date:"2025-03-21"},{name:"פקודי",date:"2025-03-28"},{name:"ויקרא",date:"2025-04-04"},
+  {name:"צו",date:"2025-04-11"},{name:"שמיני",date:"2025-04-25"},{name:"תזריע",date:"2025-05-02"},
+  {name:"מצורע",date:"2025-05-09"},{name:"אחרי מות",date:"2025-05-16"},{name:"קדושים",date:"2025-05-23"},
+  {name:"אמור",date:"2025-05-30"},{name:"בהר",date:"2025-06-06"},{name:"בחוקותי",date:"2025-06-13"},
+  {name:"במדבר",date:"2025-06-20"},{name:"נשא",date:"2025-06-27"},{name:"בהעלותך",date:"2025-07-04"},
+  {name:"שלח",date:"2025-07-11"},{name:"קרח",date:"2025-07-18"},{name:"חקת",date:"2025-07-25"},
+  {name:"בלק",date:"2025-08-01"},{name:"פינחס",date:"2025-08-08"},{name:"מטות",date:"2025-08-15"},
+  {name:"מסעי",date:"2025-08-22"},{name:"דברים",date:"2025-08-29"},{name:"ואתחנן",date:"2025-09-05"},
+  {name:"עקב",date:"2025-09-12"},{name:"ראה",date:"2025-09-19"},{name:"שופטים",date:"2025-09-26"},
+  {name:"כי תצא",date:"2025-10-03"},{name:"כי תבוא",date:"2025-10-10"},{name:"נצבים",date:"2025-10-17"},
+  {name:"וילך",date:"2025-10-24"},{name:"האזינו",date:"2025-10-31"},{name:"וזאת הברכה",date:"2025-11-07"},
+  // 5786 - שנה פשוטה - פרשיות מחוברות
+  {name:"בראשית",date:"2025-10-18"},{name:"נח",date:"2025-10-25"},{name:"לך לך",date:"2025-11-01"},
+  {name:"וירא",date:"2025-11-08"},{name:"חיי שרה",date:"2025-11-15"},{name:"תולדות",date:"2025-11-22"},
+  {name:"ויצא",date:"2025-11-29"},{name:"וישלח",date:"2025-12-06"},{name:"וישב",date:"2025-12-13"},
+  {name:"מקץ",date:"2025-12-20"},{name:"ויגש",date:"2025-12-27"},{name:"ויחי",date:"2026-01-03"},
+  {name:"שמות",date:"2026-01-10"},{name:"וארא",date:"2026-01-17"},{name:"בא",date:"2026-01-24"},
+  {name:"בשלח",date:"2026-01-31"},{name:"יתרו",date:"2026-02-07"},{name:"משפטים",date:"2026-02-14"},
+  {name:"תרומה",date:"2026-02-21"},{name:"תצוה",date:"2026-02-28"},{name:"כי תשא",date:"2026-03-07"},
+  {name:"ויקהל-פקודי",date:"2026-03-14"},{name:"ויקרא",date:"2026-03-28"},
+  {name:"צו",date:"2026-04-04"},{name:"שמיני",date:"2026-04-18"},{name:"תזריע-מצורע",date:"2026-04-25"},
+  {name:"אחרי מות-קדושים",date:"2026-05-02"},{name:"אמור",date:"2026-05-09"},{name:"בהר-בחוקותי",date:"2026-05-16"},
+  {name:"במדבר",date:"2026-05-23"},{name:"נשא",date:"2026-05-30"},{name:"בהעלותך",date:"2026-06-06"},
+  {name:"שלח",date:"2026-06-13"},{name:"קרח",date:"2026-06-20"},{name:"חקת-בלק",date:"2026-06-27"},
+  {name:"פינחס",date:"2026-07-04"},{name:"מטות-מסעי",date:"2026-07-11"},{name:"דברים",date:"2026-07-18"},
+  {name:"ואתחנן",date:"2026-07-25"},{name:"עקב",date:"2026-08-01"},{name:"ראה",date:"2026-08-08"},
+  {name:"שופטים",date:"2026-08-15"},{name:"כי תצא",date:"2026-08-22"},{name:"כי תבוא",date:"2026-08-29"},
+  {name:"נצבים-וילך",date:"2026-09-05"},{name:"האזינו",date:"2026-09-19"},{name:"וזאת הברכה",date:"2026-09-26"}
 ];
 
 function getParasha(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr);
+  // Find the Friday of the week containing this date
+  // Sunday=0, Monday=1, ... Friday=5, Saturday=6
   const day = d.getDay();
-  // find the Friday of that week (Shabbat eve)
-  const daysToFri = day === 6 ? 6 : (5 - day + 7) % 7;
+  let daysToFri;
+  if (day === 5) daysToFri = 0;       // already Friday
+  else if (day === 6) daysToFri = 6;  // Saturday -> next Friday
+  else daysToFri = 5 - day;           // Sunday-Thursday -> this week's Friday
   const fri = new Date(d);
   fri.setDate(d.getDate() + daysToFri);
   const friStr = fri.toISOString().slice(0,10);
-  // find closest parasha whose Friday <= this Friday
-  let best = PARSHIOT[0];
+  // Find the parasha whose Friday date matches exactly
   for (const p of PARSHIOT) {
-    if (p.date <= friStr) best = p;
-    else break;
+    if (p.date === friStr) return p.name;
   }
-  // if the next parasha's Friday matches exactly, use that
+  // If no exact match, find closest future parasha
   for (const p of PARSHIOT) {
-    if (p.date === friStr) { best = p; break; }
+    if (p.date >= friStr) return p.name;
   }
-  return best.name;
-
+  return PARSHIOT[PARSHIOT.length - 1].name;
+}
 
 // ============================================================
 // FIREBASE
 // ============================================================
-let DB_URL = "https://shabatot-e1a79-default-rtdb.firebaseio.com";
+let DB_URL = 'https://shabatot-e1a79-default-rtdb.firebaseio.com';
 let firebaseListenerActive = false;
 let lastPushedData = '';
 
 function getApiUrl(path) {
   return DB_URL.replace(/\/$/, '') + path + '.json';
-
+}
 
 async function fbGet(path) {
   const r = await fetch(getApiUrl(path));
   if (!r.ok) throw new Error('Firebase GET error ' + r.status);
   return r.json();
-
+}
 
 async function fbSet(path, data) {
   const r = await fetch(getApiUrl(path), {
@@ -455,14 +435,14 @@ async function fbSet(path, data) {
   });
   if (!r.ok) throw new Error('Firebase PUT error ' + r.status);
   return r.json();
-
+}
 
 // Real-time listener using SSE (Firebase streaming)
 let sseSource = null;
 function startFirebaseListener() {
   if (sseSource) sseSource.close();
   try {
-    sseSource = new EventSource(getApiUrl('/shabbat_data') + '?auth=');
+    sseSource = new EventSource(getApiUrl('/shabbat_data'));
     sseSource.addEventListener('put', (e) => {
       try {
         const payload = JSON.parse(e.data);
@@ -475,7 +455,7 @@ function startFirebaseListener() {
     sseSource.onerror = () => setSyncStatus('warn', '🟡 בעיית חיבור - מנסה שוב...');
     sseSource.onopen = () => setSyncStatus('live', '🟢 מחובר ומסתנכרן בזמן אמת');
   } catch(e) { setSyncStatus('warn', '🟡 SSE לא נתמך - פולינג'); startPolling(); }
-
+}
 
 let pollInterval = null;
 function startPolling() {
@@ -489,7 +469,7 @@ function startPolling() {
       }
     } catch(e) { setSyncStatus('warn', '🟡 בעיית חיבור'); }
   }, 8000);
-
+}
 
 function applyRemoteData(remoteData) {
   const remoteMod = remoteData.lastModified || 0;
@@ -504,7 +484,7 @@ function applyRemoteData(remoteData) {
     if (setTab && !setTab.classList.contains('hidden')) renderSettings();
     setSyncStatus('live', '🟢 עודכן ממכשיר אחר');
   }
-
+}
 
 async function pushToFirebase() {
   try {
@@ -516,7 +496,7 @@ async function pushToFirebase() {
   } catch(e) {
     setSyncStatus('warn', '🟡 לא נשמר בענן - שמור מקומית');
   }
-
+}
 
 function setSyncStatus(type, msg) {
   const dot = document.getElementById('syncDot');
@@ -526,7 +506,7 @@ function setSyncStatus(type, msg) {
   dot.style.color = colors[type] || '#a0b4cc';
   msgEl.textContent = msg;
   msgEl.style.color = colors[type] || '#a0b4cc';
-
+}
 
 // ============================================================
 // DATA
@@ -541,7 +521,7 @@ function getDefaults() {
     },
     lastModified: Date.now()
   };
-
+}
 
 let D = JSON.parse(localStorage.getItem('shabbat_local') || 'null') || getDefaults();
 let editId = null;
@@ -550,12 +530,12 @@ let currentTab = 'shabbatot';
 function saveLocal() {
   D.lastModified = Date.now();
   localStorage.setItem('shabbat_local', JSON.stringify(D));
-
+}
 
 function saveAndSync() {
   saveLocal();
   pushToFirebase();
-
+}
 
 function fmt(n) { return '₪' + Number(n||0).toLocaleString('he-IL'); }
 
@@ -574,7 +554,7 @@ function calcShabbat(s) {
   const aharon_bal = Math.floor(remainder / 2);
   const malchiel_bal = remainder - aharon_bal;
   return { price, discounted, advance, balance, workers, remainder, aharon_bal, malchiel_bal };
-
+}
 
 // ============================================================
 // SETUP
@@ -588,8 +568,8 @@ function setupFirebase() {
   errEl.style.display = 'none';
   localStorage.setItem('firebase_url', url);
   DB_URL = url;
-launchApp();
-
+  launchApp();
+}
 
 function showChangeUrl() {
   const url = prompt('הכנס Firebase URL חדש:', DB_URL);
@@ -602,10 +582,10 @@ function showChangeUrl() {
     startFirebaseListener();
     pushToFirebase();
   }
-
+}
 
 async function launchApp() {
-  document.getElementById('setupScreen').classList.add('hidden');
+  // setup screen removed
   document.getElementById('mainApp').classList.remove('hidden');
   document.getElementById('currentUrlDisplay').textContent = DB_URL;
 
@@ -618,7 +598,7 @@ async function launchApp() {
       D = remote;
       saveLocal();
       setSyncStatus('live', '🟢 נטען מהענן');
-    
+    } else {
       // First time — push local
       await pushToFirebase();
     }
@@ -628,7 +608,7 @@ async function launchApp() {
 
   renderAll();
   startFirebaseListener();
-
+}
 
 // ============================================================
 // TABS
@@ -644,7 +624,7 @@ function switchTab(id, btn) {
   btn.classList.add('active');
   if (id === 'finances') renderFinances();
   if (id === 'settings') renderSettings();
-
+}
 
 // ============================================================
 // RENDER
@@ -658,7 +638,7 @@ function renderAll() {
   if (!sorted.length) { list.innerHTML = ''; empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden');
   list.innerHTML = sorted.map(s => renderCard(s)).join('');
-
+}
 
 function renderCard(s) {
   const c = calcShabbat(s);
@@ -724,7 +704,7 @@ function renderCard(s) {
       '</div>' +
     '</div>' +
   '</div>';
-
+}
 
 function togglePay(id, type) {
   const s = D.shabbatot.find(x => x.id === id);
@@ -732,13 +712,13 @@ function togglePay(id, type) {
   if (type === 'advance') s.advance_paid = !s.advance_paid;
   else s.final_paid = !s.final_paid;
   saveAndSync(); renderAll();
-
+}
 
 function deleteShabbat(id) {
   if (!confirm('למחוק שבת זו?')) return;
   D.shabbatot = D.shabbatot.filter(s => s.id !== id);
   saveAndSync(); renderAll();
-
+}
 
 // ============================================================
 // FORM
@@ -763,7 +743,7 @@ function openNewForm() {
   setFormVal('fNotes','');
   updateTypeOptions(); updateCalc();
   document.getElementById('formModal').classList.remove('hidden');
-
+}
 
 function openEdit(id) {
   const s = D.shabbatot.find(x => x.id === id);
@@ -789,7 +769,7 @@ function openEdit(id) {
   setFormVal('fNotes', s.notes||'');
   updateTypeOptions(); updateCalc();
   document.getElementById('formModal').classList.remove('hidden');
-
+}
 
 function setFormVal(id, val) { const el = document.getElementById(id); if(el) el.value = val; }
 
@@ -797,12 +777,12 @@ function updateTypeOptions() {
   const st = D.settings;
   document.getElementById('optBasic').textContent = 'בסיסי - ' + fmt(st.base_price);
   document.getElementById('optPremium').textContent = 'פרימיום - ' + fmt(st.premium_price);
-
+}
 
 function onDateChange() {
   const date = document.getElementById('fDate').value;
   document.getElementById('fParasha').value = getParasha(date);
-
+}
 
 function updateCalc() {
   const st = D.settings;
@@ -826,7 +806,7 @@ function updateCalc() {
   document.getElementById('cRemainder').textContent = fmt(remainder);
   document.getElementById('cAharon').textContent = fmt(aharon);
   document.getElementById('cMalchiel').textContent = fmt(malchiel);
-
+}
 
 function saveForm() {
   const s = {
@@ -851,7 +831,7 @@ function saveForm() {
   if (editId) D.shabbatot = D.shabbatot.map(x => x.id === editId ? s : x);
   else D.shabbatot.push(s);
   saveAndSync(); renderAll(); closeForm();
-
+}
 
 function closeForm() { document.getElementById('formModal').classList.add('hidden'); }
 function closeFormOutside(e) { if (e.target.id === 'formModal') closeForm(); }
@@ -868,7 +848,7 @@ function totalMalchielEarned() {
     if (s.final_paid) total += c.malchiel_bal;
   }
   return total;
-
+}
 
 function renderFinances() {
   const earned = totalMalchielEarned();
@@ -890,11 +870,11 @@ function renderFinances() {
     '<div style="display:flex;gap:8px;align-items:center"><span style="color:#ff7b7b">' + fmt(e.amount) + '</span>' +
     '<button class="btn-red btn-tiny" onclick="removeExpense('+i+')">✕</button></div></div>'
   ).join('');
-
+}
 
 function bStat(label, val, color) {
   return '<div class="big-stat"><div class="big-stat-label">' + label + '</div><div class="big-stat-val" style="color:' + color + '">' + val + '</div></div>';
-
+}
 
 function addReceived() {
   const amt = +document.getElementById('receiveAmt').value;
@@ -905,7 +885,7 @@ function addReceived() {
   document.getElementById('receiveAmt').value = '';
   document.getElementById('receiveNote').value = '';
   saveAndSync(); renderFinances();
-
+}
 function removeReceived(i) { D.received.splice(i,1); saveAndSync(); renderFinances(); }
 
 function addExpense() {
@@ -917,7 +897,7 @@ function addExpense() {
   document.getElementById('expAmt').value = '';
   document.getElementById('expDesc').value = '';
   saveAndSync(); renderFinances();
-
+}
 function removeExpense(i) { D.expenses.splice(i,1); saveAndSync(); renderFinances(); }
 
 // ============================================================
@@ -947,7 +927,7 @@ function generateWA() {
   });
   document.getElementById('waText').value = lines.join('\n');
   document.getElementById('waModal').classList.remove('hidden');
-
+}
 function copyWA() { navigator.clipboard.writeText(document.getElementById('waText').value).then(()=>alert('הועתק!')); }
 function openWA() { window.open('https://wa.me/?text='+encodeURIComponent(document.getElementById('waText').value),'_blank'); }
 function closeWA() { document.getElementById('waModal').classList.add('hidden'); }
@@ -968,7 +948,7 @@ function renderSettings() {
     '<input type="number" value="'+(D.settings[k]||0)+'" onchange="updateSetting(\''+k+'\',this.value)"></div>'
   ).join('');
   document.getElementById('currentUrlDisplay').textContent = DB_URL;
-
+}
 
 function updateSetting(key, val) { D.settings[key] = +val; saveAndSync(); }
 
@@ -978,14 +958,14 @@ function exportBackup() {
   a.href = URL.createObjectURL(blob);
   a.download = 'shabbat-backup-'+new Date().toISOString().slice(0,10)+'.json';
   a.click();
-
+}
 
 function importBackup(e) {
   const file = e.target.files[0]; if(!file) return;
   const r = new FileReader();
   r.onload = ev => { try { D = JSON.parse(ev.target.result); saveAndSync(); renderAll(); alert('יובא בהצלחה!'); } catch { alert('שגיאה בייבוא'); } };
   r.readAsText(file);
-
+}
 
 // ============================================================
 // SEARCH
@@ -993,7 +973,6 @@ function importBackup(e) {
 function doSearch() {
   const q = document.getElementById('globalSearch').value.trim().toLowerCase();
   const resultsEl = document.getElementById('searchResults');
-
   if (!q) {
     resultsEl.classList.add('hidden');
     ['shabbatot','finances','settings'].forEach(t => {
@@ -1003,59 +982,49 @@ function doSearch() {
     if (currentTab === 'settings') renderSettings();
     return;
   }
-
   ['shabbatot','finances','settings'].forEach(t => {
     document.getElementById('tab-'+t).classList.add('hidden');
   });
-
   const shabMatches = (D.shabbatot||[]).filter(s =>
     (s.parasha||'').toLowerCase().includes(q) ||
     (s.host_name||'').toLowerCase().includes(q) ||
     (s.date||'').includes(q) ||
     (s.notes||'').toLowerCase().includes(q)
   );
-  const recMatches = (D.received||[]).map((r,i) => ({...r, _i:i})).filter(r =>
+  const recMatches = (D.received||[]).map((r,i) => ({...r,_i:i})).filter(r =>
     (r.note||'').toLowerCase().includes(q) ||
     (r.date||'').includes(q) ||
     String(r.amount).includes(q)
   );
-  const expMatches = (D.expenses||[]).map((e,i) => ({...e, _i:i})).filter(e =>
+  const expMatches = (D.expenses||[]).map((e,i) => ({...e,_i:i})).filter(e =>
     (e.desc||'').toLowerCase().includes(q) ||
     (e.date||'').includes(q) ||
     String(e.amount).includes(q)
   );
-
   let html = '';
-
   if (shabMatches.length) {
     html += '<div class="section-title" style="margin-bottom:10px">🕯️ שבתות (' + shabMatches.length + ')</div>';
     html += shabMatches.map(s => renderCard(s)).join('');
   }
-
   if (recMatches.length) {
     html += '<div class="section-card" style="margin-bottom:12px"><div class="section-title">💵 הכנסות (' + recMatches.length + ')</div>';
     html += recMatches.map(r =>
       '<div class="row-item"><span>' + (r.date||'') + (r.note?' — '+r.note:'') + '</span>' +
       '<div style="display:flex;gap:8px;align-items:center"><span style="color:#7bff9e">' + fmt(r.amount) + '</span>' +
       '<button class="btn-red btn-tiny" onclick="removeReceived('+r._i+');doSearch()">✕</button></div></div>'
-    ).join('');
-    html += '</div>';
+    ).join('') + '</div>';
   }
-
   if (expMatches.length) {
     html += '<div class="section-card" style="margin-bottom:12px"><div class="section-title">🧾 הוצאות (' + expMatches.length + ')</div>';
     html += expMatches.map(e =>
       '<div class="row-item"><span>' + (e.date||'') + ' — ' + (e.desc||'') + '</span>' +
       '<div style="display:flex;gap:8px;align-items:center"><span style="color:#ff7b7b">' + fmt(e.amount) + '</span>' +
       '<button class="btn-red btn-tiny" onclick="removeExpense('+e._i+');doSearch()">✕</button></div></div>'
-    ).join('');
-    html += '</div>';
+    ).join('') + '</div>';
   }
-
   if (!html) {
     html = '<div class="empty-state"><div style="font-size:32px">🔍</div><div style="font-size:16px;margin-top:8px">לא נמצאו תוצאות עבור "' + document.getElementById('globalSearch').value + '"</div></div>';
   }
-
   resultsEl.innerHTML = html;
   resultsEl.classList.remove('hidden');
 }
@@ -1063,11 +1032,7 @@ function doSearch() {
 // ============================================================
 // INIT
 // ============================================================
-// always launch
 launchApp();
-
-
-
 </script>
 </body>
 </html>
