@@ -636,8 +636,14 @@ function switchTab(id, btn) {
 // RENDER
 // ============================================================
 function renderAll() {
-  const today = new Date();
-  const sorted = [...(D.shabbatot||[])].sort((a,b) => Math.abs(new Date(a.date) - today) - Math.abs(new Date(b.date) - today));
+  const today = new Date(); today.setHours(0,0,0,0);
+  const sorted = [...(D.shabbatot||[])].sort((a,b) => {
+    const da = new Date(a.date), db = new Date(b.date);
+    const futA = da >= today, futB = db >= today;
+    if (futA && futB) return da - db;   // שתיהן עתידיות — הקרובה ראשונה
+    if (!futA && !futB) return db - da; // שתיהן עברו — האחרונה ראשונה
+    return futA ? -1 : 1;              // עתידיות לפני שעברו
+  });
   const list = document.getElementById('shabbatotList');
   const empty = document.getElementById('emptyState');
   if (!list) return;
