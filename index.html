@@ -89,27 +89,20 @@ button:hover { opacity: 0.85; }
 .btn-tiny { padding: 4px 8px; font-size: 11px; border-radius: 6px; }
 .empty-state { text-align: center; color: #a0b4cc; padding: 60px; }
 .calc-preview { background: #070d1a; border-radius: 10px; padding: 12px; margin-top: 10px; border: 1px solid #1a2a3e; }
-/* SETUP SCREEN */
-#setupScreen {
-  position: fixed; inset: 0; background: #070d1a;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 9999; padding: 20px;
+/* Month grouping */
+.month-section { margin-bottom: 8px; }
+.month-header {
+  display: flex; justify-content: space-between; align-items: center;
+  background: linear-gradient(135deg, #1a1a3e, #0a1628);
+  border: 1px solid #e8c97e44; border-radius: 12px; padding: 12px 16px;
+  cursor: pointer; font-weight: 700; color: #e8c97e; font-size: 15px;
+  margin-bottom: 4px; user-select: none; transition: opacity 0.2s;
 }
-.setup-box {
-  background: linear-gradient(135deg, #1a1a2e, #0d1628);
-  border: 1px solid #e8c97e55; border-radius: 20px; padding: 32px;
-  max-width: 520px; width: 100%; text-align: center;
-}
-.setup-logo { font-size: 52px; margin-bottom: 12px; }
-.setup-title { font-size: 24px; font-weight: 800; color: #e8c97e; margin-bottom: 8px; }
-.setup-sub { font-size: 14px; color: #a0b4cc; margin-bottom: 28px; line-height: 1.6; }
-.setup-step { background: #0a1628; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; text-align: right; border: 1px solid #1a2a3e; }
-.setup-step-num { font-size: 11px; color: #e8c97e; font-weight: 700; margin-bottom: 4px; }
-.setup-step-text { font-size: 13px; color: #c0d0e0; line-height: 1.5; }
-.setup-step a { color: #4a90d9; }
-.setup-input-label { font-size: 13px; color: #a0b4cc; margin-bottom: 6px; text-align: right; margin-top: 16px; }
-.setup-input { font-size: 13px; font-family: monospace; direction: ltr; text-align: left; }
-.setup-btn { margin-top: 16px; padding: 14px 28px; font-size: 16px; font-weight: 700; width: 100%; border-radius: 12px; }
+.month-header:hover { opacity: 0.85; }
+.month-header.past { color: #7878aa; border-color: #5a5a8e44; background: linear-gradient(135deg, #111128, #0a0f1e); }
+.month-body { padding-bottom: 6px; }
+.wa-badge { font-size: 10px; padding: 2px 6px; border-radius: 6px; vertical-align: middle; display: inline-block; }
+.wa-badge.sent { background: #25d36625; color: #25d366; }
 @media (max-width: 600px) {
   .grid4 { grid-template-columns: 1fr 1fr; }
   .grid5 { grid-template-columns: 1fr 1fr; }
@@ -122,7 +115,6 @@ button:hover { opacity: 0.85; }
 </head>
 <body>
 
-<!-- ===== MAIN APP ===== -->
 <div id="mainApp">
 
 <div class="header">
@@ -143,7 +135,7 @@ button:hover { opacity: 0.85; }
 </div>
 
 <div style="padding:8px 16px;background:#0a0f1e;border-bottom:1px solid #1a2a3e">
-  <input type="text" id="globalSearch" placeholder="🔍 חפש בכל הנתונים — שבתות, הכנסות, הוצאות..." oninput="doSearch()" style="width:100%;padding:10px 14px;font-size:14px;background:#0d1628;border:1px solid #2a4a6e;border-radius:10px;color:#e8e8f0;direction:rtl;font-family:inherit">
+  <input type="text" id="globalSearch" placeholder="🔍 חפש — שם מזמין, פרשה, תאריך..." oninput="doSearch()" style="width:100%;padding:10px 14px;font-size:14px;background:#0d1628;border:1px solid #2a4a6e;border-radius:10px;color:#e8e8f0;direction:rtl;font-family:inherit">
 </div>
 
 <div class="tabs">
@@ -186,7 +178,7 @@ button:hover { opacity: 0.85; }
     </div>
   </div>
   <button class="btn-wa" onclick="generateWA()" style="width:100%;padding:14px;font-size:16px;border-radius:12px">
-    📲 שלח דוח לנרקיס ב-WhatsApp
+    📲 שלח עדכון לנרקיס (נתונים חדשים בלבד)
   </button>
 </div>
 
@@ -197,7 +189,7 @@ button:hover { opacity: 0.85; }
   </div>
   <div class="section-card" style="margin-top:14px">
     <div class="section-title">☁️ סנכרון Firebase</div>
-    <div style="font-size:13px;color:#a0b4cc;margin-bottom:10px">הנתונים מסתנכרנים בזמן אמת בין כל המכשירים שפתחו את הקובץ עם אותו Firebase URL.</div>
+    <div style="font-size:13px;color:#a0b4cc;margin-bottom:10px">הנתונים מסתנכרנים בזמן אמת בין כל המכשירים.</div>
     <div id="currentUrlDisplay" style="font-family:monospace;font-size:12px;color:#7bff9e;background:#0a1628;padding:8px;border-radius:8px;word-break:break-all"></div>
     <button onclick="showChangeUrl()" class="btn-blue" style="margin-top:10px">🔧 שנה Firebase URL</button>
   </div>
@@ -213,16 +205,15 @@ button:hover { opacity: 0.85; }
   </div>
 </div>
 
-<div id="searchResults" class="hidden" style="padding:16px;max-width:900px;margin:0 auto"></div>
+<div id="searchResults" class="hidden"></div>
 
-</div><!-- content -->
-</div><!-- mainApp -->
+</div>
+</div>
 
 <!-- FORM MODAL -->
 <div id="formModal" class="modal-overlay hidden" onclick="closeFormOutside(event)">
   <div class="modal-box" onclick="event.stopPropagation()">
     <div style="font-size:20px;font-weight:700;color:#e8c97e;margin-bottom:16px" id="formTitle">➕ שבת חדשה</div>
-
     <div class="grid2">
       <div>
         <div class="field-label">תאריך שבת</div>
@@ -261,50 +252,27 @@ button:hover { opacity: 0.85; }
         <input type="number" id="fDiscount" value="0" oninput="updateCalc()">
       </div>
     </div>
-
     <div style="border-top:1px solid #e8c97e22;margin:14px 0;padding-top:14px">
       <div class="section-title">💰 מקדמה</div>
       <div class="grid3">
-        <div>
-          <div class="field-label">סכום מקדמה</div>
-          <input type="number" id="fAdvance" oninput="updateCalc()">
-        </div>
-        <div>
-          <div class="field-label">אהרון (מקדמה)</div>
-          <input type="number" id="fAharonAdv">
-        </div>
-        <div>
-          <div class="field-label">מלכיאל (מקדמה)</div>
-          <input type="number" id="fMalchielAdv">
-        </div>
+        <div><div class="field-label">סכום מקדמה</div><input type="number" id="fAdvance" oninput="updateCalc()"></div>
+        <div><div class="field-label">אהרון (מקדמה)</div><input type="number" id="fAharonAdv"></div>
+        <div><div class="field-label">מלכיאל (מקדמה)</div><input type="number" id="fMalchielAdv"></div>
       </div>
       <div class="grid2" style="margin-top:8px">
         <div style="display:flex;align-items:center;gap:10px;padding-top:18px">
           <input type="checkbox" id="fAdvPaid" style="width:20px;height:20px">
           <label for="fAdvPaid" style="color:#a0b4cc;cursor:pointer">מקדמה שולמה</label>
         </div>
-        <div>
-          <div class="field-label">תאריך מקדמה</div>
-          <input type="date" id="fAdvDate">
-        </div>
+        <div><div class="field-label">תאריך מקדמה</div><input type="date" id="fAdvDate"></div>
       </div>
     </div>
-
     <div style="border-top:1px solid #e8c97e22;margin-bottom:14px;padding-top:14px">
       <div class="section-title">👥 יתרה - חלוקה לעובדים</div>
       <div class="grid3">
-        <div>
-          <div class="field-label">ישראל מאיר</div>
-          <input type="number" id="fIsrael" oninput="updateCalc()">
-        </div>
-        <div>
-          <div class="field-label">עידו</div>
-          <input type="number" id="fIdo" oninput="updateCalc()">
-        </div>
-        <div>
-          <div class="field-label">נחמן</div>
-          <input type="number" id="fNachman" oninput="updateCalc()">
-        </div>
+        <div><div class="field-label">ישראל מאיר</div><input type="number" id="fIsrael" oninput="updateCalc()"></div>
+        <div><div class="field-label">עידו</div><input type="number" id="fIdo" oninput="updateCalc()"></div>
+        <div><div class="field-label">נחמן</div><input type="number" id="fNachman" oninput="updateCalc()"></div>
       </div>
       <div style="background:#0a1020;border:1px solid #e8c97e22;border-radius:8px;padding:10px;margin-top:10px;font-size:12px;color:#a0b4cc">
         ℹ️ היתרה שנשארת אחרי העובדים מתחלקת אוטומטית 50/50 בין אהרון למלכיאל
@@ -312,9 +280,9 @@ button:hover { opacity: 0.85; }
       <div class="calc-preview">
         <div class="grid6">
           <div class="stat-box"><div class="stat-label">מחיר סופי</div><div class="stat-val" id="cPrice">₪0</div></div>
-          <div class="stat-box"><div class="stat-label">יתרה (אחרי מקדמה)</div><div class="stat-val" id="cBalance">₪0</div></div>
+          <div class="stat-box"><div class="stat-label">יתרה</div><div class="stat-val" id="cBalance">₪0</div></div>
           <div class="stat-box"><div class="stat-label">לעובדים</div><div class="stat-val" id="cWorkers">₪0</div></div>
-          <div class="stat-box"><div class="stat-label">נשאר לחלוקה</div><div class="stat-val" id="cRemainder">₪0</div></div>
+          <div class="stat-box"><div class="stat-label">לחלוקה</div><div class="stat-val" id="cRemainder">₪0</div></div>
           <div class="stat-box"><div class="stat-label">אהרון (יתרה)</div><div class="stat-val" id="cAharon" style="color:#a0b4cc">₪0</div></div>
           <div class="stat-box" style="border:1px solid #e8c97e44"><div class="stat-label">מלכיאל (יתרה)</div><div class="stat-val" id="cMalchiel" style="color:#e8c97e">₪0</div></div>
         </div>
@@ -324,12 +292,7 @@ button:hover { opacity: 0.85; }
         <label for="fFinalPaid" style="color:#a0b4cc;cursor:pointer">תשלום סופי שולם</label>
       </div>
     </div>
-
-    <div>
-      <div class="field-label">הערות</div>
-      <textarea id="fNotes" style="height:60px;resize:vertical"></textarea>
-    </div>
-
+    <div><div class="field-label">הערות</div><textarea id="fNotes" style="height:60px;resize:vertical"></textarea></div>
     <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
       <button class="btn-gray" onclick="closeForm()">ביטול</button>
       <button class="btn-gold" onclick="saveForm()">💾 שמור</button>
@@ -340,22 +303,20 @@ button:hover { opacity: 0.85; }
 <!-- WA MODAL -->
 <div id="waModal" class="modal-overlay hidden" onclick="closeWA()">
   <div class="modal-box" style="max-width:500px" onclick="event.stopPropagation()">
-    <div style="font-size:18px;font-weight:700;color:#25d366;margin-bottom:12px">📲 דוח לנרקיס</div>
+    <div style="font-size:18px;font-weight:700;color:#25d366;margin-bottom:4px">📲 עדכון לנרקיס</div>
+    <div style="font-size:12px;color:#a0b4cc;margin-bottom:12px">נתונים חדשים בלבד (שטרם נשלחו)</div>
     <textarea id="waText" readonly style="height:300px;width:100%;font-size:12px;font-family:monospace;direction:rtl"></textarea>
-    <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
       <button class="btn-blue" onclick="copyWA()">📋 העתק</button>
-      <button class="btn-wa" onclick="openWA()">פתח WhatsApp</button>
+      <button class="btn-wa" onclick="openAndMarkWA()">📲 שלח ב-WhatsApp</button>
+      <button class="btn-green" onclick="confirmMarkSent()">✅ סמן כנשלח</button>
       <button class="btn-red" onclick="closeWA()">סגור</button>
     </div>
   </div>
 </div>
 
 <script>
-// ============================================================
-// PARSHIOT — Friday dates
-// ============================================================
 const PARSHIOT = [
-  // 5785
   {name:"בראשית",date:"2024-10-26"},{name:"נח",date:"2024-11-02"},{name:"לך לך",date:"2024-11-09"},
   {name:"וירא",date:"2024-11-16"},{name:"חיי שרה",date:"2024-11-23"},{name:"תולדות",date:"2024-11-30"},
   {name:"ויצא",date:"2024-12-07"},{name:"וישלח",date:"2024-12-14"},{name:"וישב",date:"2024-12-21"},
@@ -374,7 +335,6 @@ const PARSHIOT = [
   {name:"עקב",date:"2025-09-12"},{name:"ראה",date:"2025-09-19"},{name:"שופטים",date:"2025-09-26"},
   {name:"כי תצא",date:"2025-10-03"},{name:"כי תבוא",date:"2025-10-10"},{name:"נצבים",date:"2025-10-17"},
   {name:"וילך",date:"2025-10-24"},{name:"האזינו",date:"2025-10-31"},{name:"וזאת הברכה",date:"2025-11-07"},
-  // 5786 - שנה פשוטה - פרשיות מחוברות
   {name:"בראשית",date:"2025-10-18"},{name:"נח",date:"2025-10-25"},{name:"לך לך",date:"2025-11-01"},
   {name:"וירא",date:"2025-11-08"},{name:"חיי שרה",date:"2025-11-15"},{name:"תולדות",date:"2025-11-22"},
   {name:"ויצא",date:"2025-11-29"},{name:"וישלח",date:"2025-12-06"},{name:"וישב",date:"2025-12-13"},
@@ -396,123 +356,82 @@ const PARSHIOT = [
 function getParasha(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr);
-  // Find the Friday of the week containing this date
-  // Sunday=0, Monday=1, ... Friday=5, Saturday=6
   const day = d.getDay();
-  let daysToFri;
-  if (day === 5) daysToFri = 0;       // already Friday
-  else if (day === 6) daysToFri = 6;  // Saturday -> next Friday
-  else daysToFri = 5 - day;           // Sunday-Thursday -> this week's Friday
-  const fri = new Date(d);
-  fri.setDate(d.getDate() + daysToFri);
+  const daysToFri = day===5?0:day===6?6:5-day;
+  const fri = new Date(d); fri.setDate(d.getDate()+daysToFri);
   const friStr = fri.toISOString().slice(0,10);
-  // Find the parasha whose Friday date matches exactly
-  for (const p of PARSHIOT) {
-    if (p.date === friStr) return p.name;
-  }
-  // If no exact match, find closest future parasha
-  for (const p of PARSHIOT) {
-    if (p.date >= friStr) return p.name;
-  }
-  return PARSHIOT[PARSHIOT.length - 1].name;
+  for (const p of PARSHIOT) { if (p.date===friStr) return p.name; }
+  for (const p of PARSHIOT) { if (p.date>=friStr) return p.name; }
+  return PARSHIOT[PARSHIOT.length-1].name;
 }
 
 // ============================================================
 // FIREBASE
 // ============================================================
 let DB_URL = 'https://shabatot-e1a79-default-rtdb.firebaseio.com';
-let firebaseListenerActive = false;
 let lastPushedData = '';
+let sseSource = null;
+let pollInterval = null;
 
-function getApiUrl(path) {
-  return DB_URL.replace(/\/$/, '') + path + '.json';
-}
+function getApiUrl(path) { return DB_URL.replace(/\/$/,'') + path + '.json'; }
 
 async function fbGet(path) {
   const r = await fetch(getApiUrl(path));
-  if (!r.ok) throw new Error('Firebase GET error ' + r.status);
+  if (!r.ok) throw new Error(r.status);
   return r.json();
 }
 
 async function fbSet(path, data) {
-  const r = await fetch(getApiUrl(path), {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-  if (!r.ok) throw new Error('Firebase PUT error ' + r.status);
+  const r = await fetch(getApiUrl(path), {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  if (!r.ok) throw new Error(r.status);
   return r.json();
 }
 
-// Real-time listener using SSE (Firebase streaming)
-let sseSource = null;
 function startFirebaseListener() {
   if (sseSource) sseSource.close();
   try {
     sseSource = new EventSource(getApiUrl('/shabbat_data'));
-    sseSource.addEventListener('put', (e) => {
+    sseSource.addEventListener('put', e => {
       try {
         const payload = JSON.parse(e.data);
-        if (payload.data && JSON.stringify(payload.data) !== lastPushedData) {
-          applyRemoteData(payload.data);
-          setSyncStatus('live', '🟢 מסונכרן');
-        }
-      } catch(err) {}
+        if (payload.data && JSON.stringify(payload.data)!==lastPushedData) applyRemoteData(payload.data);
+      } catch(err){}
     });
-    sseSource.onerror = () => setSyncStatus('warn', '🟡 בעיית חיבור - מנסה שוב...');
-    sseSource.onopen = () => setSyncStatus('live', '🟢 מחובר ומסתנכרן בזמן אמת');
-  } catch(e) { setSyncStatus('warn', '🟡 SSE לא נתמך - פולינג'); startPolling(); }
+    sseSource.onerror = () => setSyncStatus('warn','🟡 בעיית חיבור');
+    sseSource.onopen = () => setSyncStatus('live','🟢 מחובר ומסתנכרן');
+  } catch(e) {
+    pollInterval = setInterval(async()=>{
+      try { const r=await fbGet('/shabbat_data'); if(r&&JSON.stringify(r)!==lastPushedData) applyRemoteData(r); } catch(e){}
+    }, 8000);
+  }
 }
 
-let pollInterval = null;
-function startPolling() {
-  if (pollInterval) clearInterval(pollInterval);
-  pollInterval = setInterval(async () => {
-    try {
-      const remote = await fbGet('/shabbat_data');
-      if (remote && JSON.stringify(remote) !== lastPushedData) {
-        applyRemoteData(remote);
-        setSyncStatus('live', '🟢 מסונכרן');
-      }
-    } catch(e) { setSyncStatus('warn', '🟡 בעיית חיבור'); }
-  }, 8000);
-}
-
-function applyRemoteData(remoteData) {
-  const remoteMod = remoteData.lastModified || 0;
-  const localMod = D.lastModified || 0;
-  if (remoteMod > localMod) {
-    D = remoteData;
-    localStorage.setItem('shabbat_local', JSON.stringify(D));
-    renderAll();
-    const finTab = document.getElementById('tab-finances');
-    if (finTab && !finTab.classList.contains('hidden')) renderFinances();
-    const setTab = document.getElementById('tab-settings');
-    if (setTab && !setTab.classList.contains('hidden')) renderSettings();
-    setSyncStatus('live', '🟢 עודכן ממכשיר אחר');
+function applyRemoteData(remote) {
+  if ((remote.lastModified||0) > (D.lastModified||0)) {
+    D = remote; saveLocal(); renderAll();
+    const fin = document.getElementById('tab-finances');
+    if (fin&&!fin.classList.contains('hidden')) renderFinances();
+    setSyncStatus('live','🟢 עודכן ממכשיר אחר');
+  } else {
+    setSyncStatus('live','🟢 מסונכרן');
   }
 }
 
 async function pushToFirebase() {
   try {
-    const str = JSON.stringify(D);
-    lastPushedData = str;
+    const str = JSON.stringify(D); lastPushedData = str;
     await fbSet('/shabbat_data', D);
-    setSyncStatus('live', '🟢 נשמר בענן');
+    setSyncStatus('live','🟢 נשמר בענן');
     document.getElementById('syncTime').textContent = new Date().toLocaleTimeString('he-IL');
-  } catch(e) {
-    setSyncStatus('warn', '🟡 לא נשמר בענן - שמור מקומית');
-  }
+  } catch(e) { setSyncStatus('warn','🟡 לא נשמר בענן'); }
 }
 
 function setSyncStatus(type, msg) {
+  const colors = {live:'#7bff9e',warn:'#ffcc44',error:'#ff7b7b'};
   const dot = document.getElementById('syncDot');
   const msgEl = document.getElementById('syncMsg');
-  if (!dot || !msgEl) return;
-  const colors = { live: '#7bff9e', warn: '#ffcc44', error: '#ff7b7b' };
-  dot.style.color = colors[type] || '#a0b4cc';
-  msgEl.textContent = msg;
-  msgEl.style.color = colors[type] || '#a0b4cc';
+  if (dot) dot.style.color = colors[type]||'#a0b4cc';
+  if (msgEl) { msgEl.textContent = msg; msgEl.style.color = colors[type]||'#a0b4cc'; }
 }
 
 // ============================================================
@@ -520,17 +439,17 @@ function setSyncStatus(type, msg) {
 // ============================================================
 function getDefaults() {
   return {
-    shabbatot: [], received: [], expenses: [],
-    settings: {
-      base_price: 13000, premium_price: 16000, prem_room_price: 500,
-      advance: 5000, aharon_adv: 2500, malchiel_adv: 2500,
-      israel_meir: 1000, ido: 500, nachman: 1700
+    shabbatot:[], received:[], expenses:[],
+    settings:{
+      base_price:13000, premium_price:16000, prem_room_price:500,
+      advance:5000, aharon_adv:2500, malchiel_adv:2500,
+      israel_meir:1000, ido:500, nachman:1700
     },
     lastModified: Date.now()
   };
 }
 
-let D = JSON.parse(localStorage.getItem('shabbat_local') || 'null') || getDefaults();
+let D = JSON.parse(localStorage.getItem('shabbat_local')||'null') || getDefaults();
 let editId = null;
 let currentTab = 'shabbatot';
 
@@ -538,81 +457,59 @@ function saveLocal() {
   D.lastModified = Date.now();
   localStorage.setItem('shabbat_local', JSON.stringify(D));
 }
-
-function saveAndSync() {
-  saveLocal();
-  pushToFirebase();
-}
-
+function saveAndSync() { saveLocal(); pushToFirebase(); }
 function fmt(n) { return '₪' + Number(n||0).toLocaleString('he-IL'); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+function ensureIds() {
+  let changed = false;
+  (D.received||[]).forEach(r => { if (!r.id) { r.id = uid(); changed = true; } });
+  (D.expenses||[]).forEach(e => { if (!e.id) { e.id = uid(); changed = true; } });
+  if (changed) saveLocal();
+}
 
 function calcShabbat(s) {
   const st = D.settings;
-  const baseP = s.type === 'premium' ? st.premium_price : st.base_price;
-  const premExtra = (s.prem_rooms || 0) * (st.prem_room_price || 500);
-  const price = baseP + premExtra;
-  const discounted = price - (s.discount || 0);
-  const advance = s.advance_amount != null ? s.advance_amount : st.advance;
+  const baseP = s.type==='premium' ? st.premium_price : st.base_price;
+  const price = baseP + (s.prem_rooms||0)*(st.prem_room_price||500);
+  const discounted = price - (s.discount||0);
+  const advance = s.advance_amount!=null ? s.advance_amount : st.advance;
   const balance = discounted - advance;
-  const workers = (s.israel_meir != null ? s.israel_meir : st.israel_meir)
-                + (s.ido != null ? s.ido : st.ido)
-                + (s.nachman != null ? s.nachman : st.nachman);
+  const workers = (s.israel_meir!=null?s.israel_meir:st.israel_meir)
+                + (s.ido!=null?s.ido:st.ido)
+                + (s.nachman!=null?s.nachman:st.nachman);
   const remainder = balance - workers;
-  const aharon_bal = Math.floor(remainder / 2);
+  const aharon_bal = Math.floor(remainder/2);
   const malchiel_bal = remainder - aharon_bal;
-  return { price, discounted, advance, balance, workers, remainder, aharon_bal, malchiel_bal };
+  return {price, discounted, advance, balance, workers, remainder, aharon_bal, malchiel_bal};
 }
 
 // ============================================================
 // SETUP
 // ============================================================
-function setupFirebase() {
-  let url = document.getElementById('firebaseUrlInput').value.trim();
-  const errEl = document.getElementById('setupError');
-  if (!url) { errEl.textContent = 'נא להכניס URL'; errEl.style.display='block'; return; }
-  if (!url.startsWith('https://')) { errEl.textContent = 'ה-URL צריך להתחיל ב-https://'; errEl.style.display='block'; return; }
-  url = url.replace(/\/$/, '');
-  errEl.style.display = 'none';
-  localStorage.setItem('firebase_url', url);
-  DB_URL = url;
-  launchApp();
-}
-
 function showChangeUrl() {
   const url = prompt('הכנס Firebase URL חדש:', DB_URL);
   if (url && url.startsWith('https://')) {
-    DB_URL = url.replace(/\/$/, '');
+    DB_URL = url.replace(/\/$/,'');
     localStorage.setItem('firebase_url', DB_URL);
     document.getElementById('currentUrlDisplay').textContent = DB_URL;
     if (sseSource) sseSource.close();
     if (pollInterval) clearInterval(pollInterval);
-    startFirebaseListener();
-    pushToFirebase();
+    startFirebaseListener(); pushToFirebase();
   }
 }
 
 async function launchApp() {
-  // setup screen removed
-  document.getElementById('mainApp').classList.remove('hidden');
+  const savedUrl = localStorage.getItem('firebase_url');
+  if (savedUrl) DB_URL = savedUrl;
   document.getElementById('currentUrlDisplay').textContent = DB_URL;
-
-  setSyncStatus('warn', '🟡 מתחבר לענן...');
-
-  // Try to pull existing data first
+  setSyncStatus('warn','🟡 מתחבר...');
   try {
     const remote = await fbGet('/shabbat_data');
-    if (remote && remote.shabbatot) {
-      D = remote;
-      saveLocal();
-      setSyncStatus('live', '🟢 נטען מהענן');
-    } else {
-      // First time — push local
-      await pushToFirebase();
-    }
-  } catch(e) {
-    setSyncStatus('warn', '🟡 עובד ללא ענן כרגע');
-  }
-
+    if (remote && remote.shabbatot) { D = remote; saveLocal(); setSyncStatus('live','🟢 נטען'); }
+    else await pushToFirebase();
+  } catch(e) { setSyncStatus('warn','🟡 עובד מקומית'); }
+  ensureIds();
   renderAll();
   startFirebaseListener();
 }
@@ -624,113 +521,161 @@ function switchTab(id, btn) {
   currentTab = id;
   document.getElementById('searchResults').classList.add('hidden');
   document.getElementById('globalSearch').value = '';
-  ['shabbatot','finances','settings'].forEach(t => {
-    document.getElementById('tab-'+t).classList.toggle('hidden', t !== id);
-  });
+  ['shabbatot','finances','settings'].forEach(t =>
+    document.getElementById('tab-'+t).classList.toggle('hidden', t!==id)
+  );
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  if (id === 'finances') renderFinances();
-  if (id === 'settings') renderSettings();
+  if (id==='finances') renderFinances();
+  if (id==='settings') renderSettings();
 }
 
 // ============================================================
-// RENDER
+// RENDER — grouped by month with accordion
 // ============================================================
+function formatMonthLabel(yyyymm) {
+  const months = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  const p = yyyymm.split('-');
+  return months[parseInt(p[1],10)-1] + ' ' + p[0];
+}
+
+function toggleMonth(key) {
+  const body = document.getElementById('month-body-'+key);
+  const icon = document.getElementById('month-icon-'+key);
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : '';
+  if (icon) icon.textContent = open ? '▼' : '▲';
+}
+
 function renderAll() {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const sorted = [...(D.shabbatot||[])].sort((a,b) => {
-    const da = new Date(a.date), db = new Date(b.date);
-    const futA = da >= today, futB = db >= today;
-    if (futA && futB) return da - db;   // שתיהן עתידיות — הקרובה ראשונה
-    if (!futA && !futB) return db - da; // שתיהן עברו — האחרונה ראשונה
-    return futA ? -1 : 1;              // עתידיות לפני שעברו
+  const today = new Date().toISOString().slice(0,10);
+  const currentMonth = today.slice(0,7);
+  let list = [...(D.shabbatot||[])];
+  list.sort((a,b) => {
+    const aUp=a.date>=today, bUp=b.date>=today;
+    if (aUp&&bUp) return a.date.localeCompare(b.date);
+    if (!aUp&&!bUp) return b.date.localeCompare(a.date);
+    return aUp?-1:1;
   });
-  const list = document.getElementById('shabbatotList');
+
+  const listEl = document.getElementById('shabbatotList');
   const empty = document.getElementById('emptyState');
-  if (!list) return;
-  document.getElementById('countLabel').textContent = sorted.length + ' שבתות רשומות';
-  if (!sorted.length) { list.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  if (!listEl) return;
+  document.getElementById('countLabel').textContent = list.length + ' שבתות רשומות';
+  if (!list.length) { listEl.innerHTML=''; empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden');
-  list.innerHTML = sorted.map(s => renderCard(s)).join('');
+
+  // Group by month
+  const groups = {};
+  list.forEach(s => {
+    const key = (s.date||'2000-01').slice(0,7);
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(s);
+  });
+
+  const sortedKeys = Object.keys(groups).sort((a,b) => {
+    const aF=a>=currentMonth, bF=b>=currentMonth;
+    if (aF&&bF) return a.localeCompare(b);
+    if (!aF&&!bF) return b.localeCompare(a);
+    return aF?-1:1;
+  });
+
+  listEl.innerHTML = sortedKeys.map(key => {
+    const isPast = key < currentMonth;
+    const items = groups[key];
+    const label = formatMonthLabel(key);
+    const hClass = isPast ? 'month-header past' : 'month-header';
+    const arrow = isPast ? '▼' : '▲';
+    const bodyStyle = isPast ? 'display:none' : '';
+    const unsentCount = items.filter(s=>!s.wa_sent).length;
+    const badge = unsentCount>0
+      ? '<span style="font-size:11px;background:#e8c97e22;color:#e8c97e;padding:2px 8px;border-radius:6px;margin-right:8px">'+unsentCount+' לשליחה</span>'
+      : '';
+    const meta = '<span style="font-size:12px;font-weight:400;opacity:0.7;margin-right:8px">'+items.length+' שבתות</span>'+badge;
+    return '<div class="month-section">'+
+      '<div class="'+hClass+'" onclick="toggleMonth(\''+key+'\')">'+
+        '<span>'+label+' '+meta+'</span>'+
+        '<span id="month-icon-'+key+'" style="font-size:18px">'+arrow+'</span>'+
+      '</div>'+
+      '<div class="month-body" id="month-body-'+key+'" style="'+bodyStyle+'">'+
+        items.map(s=>renderCard(s)).join('')+
+      '</div>'+
+    '</div>';
+  }).join('');
 }
 
 function renderCard(s) {
   const c = calcShabbat(s);
-  const ma = s.malchiel_adv != null ? s.malchiel_adv : D.settings.malchiel_adv;
-  const aa_adv = s.aharon_adv != null ? s.aharon_adv : D.settings.aharon_adv;
-  const im = s.israel_meir != null ? s.israel_meir : D.settings.israel_meir;
-  const ido = s.ido != null ? s.ido : D.settings.ido;
-  const na = s.nachman != null ? s.nachman : D.settings.nachman;
-  const debtLeft = c.discounted - (s.advance_paid ? c.advance : 0) - (s.final_paid ? c.balance : 0);
-  const barColor = s.type === 'premium' ? 'linear-gradient(90deg,#e8c97e,#f5e4a6)' : 'linear-gradient(90deg,#4a90d9,#7ab8f5)';
-  const premRooms = s.prem_rooms || 0;
-  const typeLabel = s.type === 'premium'
-    ? ('פרימיום 👑' + (premRooms > 0 ? ' + ' + premRooms + ' חדרים' : ''))
-    : ('בסיסי' + (premRooms > 0 ? ' + ' + premRooms + ' חדר פרימיום 🛏️' : ''));
+  const ma = s.malchiel_adv!=null?s.malchiel_adv:D.settings.malchiel_adv;
+  const aa = s.aharon_adv!=null?s.aharon_adv:D.settings.aharon_adv;
+  const im = s.israel_meir!=null?s.israel_meir:D.settings.israel_meir;
+  const ido = s.ido!=null?s.ido:D.settings.ido;
+  const na = s.nachman!=null?s.nachman:D.settings.nachman;
+  const debtLeft = c.discounted-(s.advance_paid?c.advance:0)-(s.final_paid?c.balance:0);
+  const barColor = s.type==='premium'?'linear-gradient(90deg,#e8c97e,#f5e4a6)':'linear-gradient(90deg,#4a90d9,#7ab8f5)';
+  const premRooms = s.prem_rooms||0;
+  const typeLabel = s.type==='premium'
+    ? 'פרימיום 👑'+(premRooms>0?' + '+premRooms+' חדרים':'')
+    : 'בסיסי'+(premRooms>0?' + '+premRooms+' חדר פרימיום 🛏️':'');
+  const waBadge = s.wa_sent ? ' <span class="wa-badge sent">📲 נשלח לנרקיס</span>' : '';
 
-  return '<div class="card">' +
-    '<div class="card-top-bar" style="background:' + barColor + '"></div>' +
-    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">' +
-      '<div>' +
-        '<div style="font-size:19px;font-weight:700;color:#e8c97e;margin-bottom:2px">פרשת ' + (s.parasha||'—') + '</div>' +
-        '<div style="color:#a0b4cc;font-size:13px">' + (s.date||'') + ' | מזמין: <span style="color:#fff">' + (s.host_name||'—') + '</span></div>' +
-      '</div>' +
-      '<div style="display:flex;gap:8px">' +
-        '<button class="btn-blue btn-tiny" onclick="openEdit(\'' + s.id + '\')">✏️ ערוך</button>' +
-        '<button class="btn-red btn-tiny" onclick="deleteShabbat(\'' + s.id + '\')">🗑</button>' +
-      '</div>' +
-    '</div>' +
-    '<div class="grid3" style="margin-bottom:12px">' +
-      '<div class="stat-box"><div class="stat-label">סוג</div><div class="stat-val" style="font-size:12px">' + typeLabel + '</div></div>' +
-      '<div class="stat-box"><div class="stat-label">מחיר סופי</div><div class="stat-val">' + fmt(c.discounted) + '</div>' + (s.discount?'<div class="stat-sub">הנחה '+fmt(s.discount)+'</div>':'') + '</div>' +
-      '<div class="stat-box"><div class="stat-label">יתרת חוב</div><div class="stat-val" style="color:' + (debtLeft>0?'#ff7b7b':'#7bff9e') + '">' + fmt(debtLeft) + '</div></div>' +
-    '</div>' +
-    '<div class="grid2" style="margin-bottom:10px">' +
-      '<div class="pay-box" style="background:' + (s.advance_paid?'#0a2e1a':'#1a0a0a') + ';border:1px solid ' + (s.advance_paid?'#7bff9e44':'#ff7b7b44') + '" onclick="togglePay(\'' + s.id + '\',\'advance\')">' +
-        '<div style="font-size:12px;color:#a0b4cc;margin-bottom:3px">מקדמה</div>' +
-        '<div style="font-size:16px;font-weight:700;color:' + (s.advance_paid?'#7bff9e':'#ff7b7b') + '">' + fmt(c.advance) + '</div>' +
-        '<div style="font-size:11px;color:' + (s.advance_paid?'#7bff9e':'#ff7b7b') + '">' + (s.advance_paid?'✅ שולם '+(s.advance_date||''):'⏳ ממתין — לחץ לאישור') + '</div>' +
-      '</div>' +
-      '<div class="pay-box" style="background:' + (s.final_paid?'#0a2e1a':'#1a0a0a') + ';border:1px solid ' + (s.final_paid?'#7bff9e44':'#ff7b7b44') + '" onclick="togglePay(\'' + s.id + '\',\'final\')">' +
-        '<div style="font-size:12px;color:#a0b4cc;margin-bottom:3px">תשלום סופי</div>' +
-        '<div style="font-size:16px;font-weight:700;color:' + (s.final_paid?'#7bff9e':'#ff7b7b') + '">' + fmt(c.balance) + '</div>' +
-        '<div style="font-size:11px;color:' + (s.final_paid?'#7bff9e':'#ff7b7b') + '">' + (s.final_paid?'✅ שולם':'⏳ ממתין — לחץ לאישור') + '</div>' +
-      '</div>' +
-    '</div>' +
-    '<div style="border-top:1px solid #e8c97e22;padding-top:10px">' +
-      '<div style="font-size:11px;color:#a0b4cc;margin-bottom:8px">חלוקת תשלומים:</div>' +
-      '<div class="grid5" style="margin-bottom:8px">' +
-        '<div class="mini-worker"><div class="mini-worker-label">אהרון (מקד׳)</div><div class="mini-worker-val">' + fmt(aa_adv) + '</div></div>' +
-        '<div class="mini-worker" style="border:1px solid #e8c97e33"><div class="mini-worker-label">מלכיאל (מקד׳)</div><div class="mini-worker-val" style="color:#e8c97e">' + fmt(ma) + '</div></div>' +
-        '<div class="mini-worker"><div class="mini-worker-label">ישראל מאיר</div><div class="mini-worker-val">' + fmt(im) + '</div></div>' +
-        '<div class="mini-worker"><div class="mini-worker-label">עידו</div><div class="mini-worker-val">' + fmt(ido) + '</div></div>' +
-        '<div class="mini-worker"><div class="mini-worker-label">נחמן</div><div class="mini-worker-val">' + fmt(na) + '</div></div>' +
-      '</div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
-        '<div style="display:flex;justify-content:space-between;background:#0a1628;border-radius:8px;padding:7px 10px">' +
-          '<span style="color:#a0b4cc;font-size:12px">אהרון (יתרה):</span>' +
-          '<span style="font-weight:700;color:#a0b4cc">' + fmt(c.aharon_bal) + '</span>' +
-        '</div>' +
-        '<div style="display:flex;justify-content:space-between;background:#0a0a1a;border:1px solid #e8c97e33;border-radius:8px;padding:7px 10px">' +
-          '<span style="color:#a0b4cc;font-size:12px">מלכיאל (יתרה):</span>' +
-          '<span style="font-weight:700;color:#e8c97e">' + fmt(c.malchiel_bal) + '</span>' +
-        '</div>' +
-      '</div>' +
-    '</div>' +
+  return '<div class="card">'+
+    '<div class="card-top-bar" style="background:'+barColor+'"></div>'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'+
+      '<div>'+
+        '<div style="font-size:19px;font-weight:700;color:#e8c97e;margin-bottom:2px">פרשת '+(s.parasha||'—')+waBadge+'</div>'+
+        '<div style="color:#a0b4cc;font-size:13px">'+(s.date||'')+' | מזמין: <span style="color:#fff">'+(s.host_name||'—')+'</span></div>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px">'+
+        '<button class="btn-blue btn-tiny" onclick="openEdit(\''+s.id+'\')">✏️ ערוך</button>'+
+        '<button class="btn-red btn-tiny" onclick="deleteShabbat(\''+s.id+'\')">🗑</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="grid3" style="margin-bottom:12px">'+
+      '<div class="stat-box"><div class="stat-label">סוג</div><div class="stat-val" style="font-size:12px">'+typeLabel+'</div></div>'+
+      '<div class="stat-box"><div class="stat-label">מחיר סופי</div><div class="stat-val">'+fmt(c.discounted)+'</div>'+(s.discount?'<div class="stat-sub">הנחה '+fmt(s.discount)+'</div>':'')+'</div>'+
+      '<div class="stat-box"><div class="stat-label">יתרת חוב</div><div class="stat-val" style="color:'+(debtLeft>0?'#ff7b7b':'#7bff9e')+'">'+fmt(debtLeft)+'</div></div>'+
+    '</div>'+
+    '<div class="grid2" style="margin-bottom:10px">'+
+      '<div class="pay-box" style="background:'+(s.advance_paid?'#0a2e1a':'#1a0a0a')+';border:1px solid '+(s.advance_paid?'#7bff9e44':'#ff7b7b44')+'" onclick="togglePay(\''+s.id+'\',\'advance\')">'+
+        '<div style="font-size:12px;color:#a0b4cc;margin-bottom:3px">מקדמה</div>'+
+        '<div style="font-size:16px;font-weight:700;color:'+(s.advance_paid?'#7bff9e':'#ff7b7b')+'">'+fmt(c.advance)+'</div>'+
+        '<div style="font-size:11px;color:'+(s.advance_paid?'#7bff9e':'#ff7b7b')+'">'+(s.advance_paid?'✅ שולם '+(s.advance_date||''):'⏳ ממתין — לחץ לאישור')+'</div>'+
+      '</div>'+
+      '<div class="pay-box" style="background:'+(s.final_paid?'#0a2e1a':'#1a0a0a')+';border:1px solid '+(s.final_paid?'#7bff9e44':'#ff7b7b44')+'" onclick="togglePay(\''+s.id+'\',\'final\')">'+
+        '<div style="font-size:12px;color:#a0b4cc;margin-bottom:3px">תשלום סופי</div>'+
+        '<div style="font-size:16px;font-weight:700;color:'+(s.final_paid?'#7bff9e':'#ff7b7b')+'">'+fmt(c.balance)+'</div>'+
+        '<div style="font-size:11px;color:'+(s.final_paid?'#7bff9e':'#ff7b7b')+'">'+(s.final_paid?'✅ שולם':'⏳ ממתין — לחץ לאישור')+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="border-top:1px solid #e8c97e22;padding-top:10px">'+
+      '<div style="font-size:11px;color:#a0b4cc;margin-bottom:8px">חלוקת תשלומים:</div>'+
+      '<div class="grid5" style="margin-bottom:8px">'+
+        '<div class="mini-worker"><div class="mini-worker-label">אהרון (מקד׳)</div><div class="mini-worker-val">'+fmt(aa)+'</div></div>'+
+        '<div class="mini-worker" style="border:1px solid #e8c97e33"><div class="mini-worker-label">מלכיאל (מקד׳)</div><div class="mini-worker-val" style="color:#e8c97e">'+fmt(ma)+'</div></div>'+
+        '<div class="mini-worker"><div class="mini-worker-label">ישראל מאיר</div><div class="mini-worker-val">'+fmt(im)+'</div></div>'+
+        '<div class="mini-worker"><div class="mini-worker-label">עידו</div><div class="mini-worker-val">'+fmt(ido)+'</div></div>'+
+        '<div class="mini-worker"><div class="mini-worker-label">נחמן</div><div class="mini-worker-val">'+fmt(na)+'</div></div>'+
+      '</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
+        '<div style="display:flex;justify-content:space-between;background:#0a1628;border-radius:8px;padding:7px 10px"><span style="color:#a0b4cc;font-size:12px">אהרון (יתרה):</span><span style="font-weight:700;color:#a0b4cc">'+fmt(c.aharon_bal)+'</span></div>'+
+        '<div style="display:flex;justify-content:space-between;background:#0a0a1a;border:1px solid #e8c97e33;border-radius:8px;padding:7px 10px"><span style="color:#a0b4cc;font-size:12px">מלכיאל (יתרה):</span><span style="font-weight:700;color:#e8c97e">'+fmt(c.malchiel_bal)+'</span></div>'+
+      '</div>'+
+    '</div>'+
   '</div>';
 }
 
 function togglePay(id, type) {
-  const s = D.shabbatot.find(x => x.id === id);
-  if (!s) return;
-  if (type === 'advance') s.advance_paid = !s.advance_paid;
+  const s = D.shabbatot.find(x=>x.id===id); if(!s) return;
+  if (type==='advance') s.advance_paid = !s.advance_paid;
   else s.final_paid = !s.final_paid;
   saveAndSync(); renderAll();
 }
 
 function deleteShabbat(id) {
   if (!confirm('למחוק שבת זו?')) return;
-  D.shabbatot = D.shabbatot.filter(s => s.id !== id);
+  D.shabbatot = D.shabbatot.filter(s=>s.id!==id);
   saveAndSync(); renderAll();
 }
 
@@ -741,78 +686,69 @@ function openNewForm() {
   editId = null;
   document.getElementById('formTitle').textContent = '➕ שבת חדשה';
   const st = D.settings;
-  setFormVal('fDate',''); setFormVal('fParasha',''); setFormVal('fHost','');
+  sv('fDate',''); sv('fParasha',''); sv('fHost','');
   document.getElementById('fType').value = 'basic';
   document.getElementById('fPremRooms').value = '0';
-  setFormVal('fDiscount', 0);
-  setFormVal('fAdvance', st.advance);
-  setFormVal('fAharonAdv', st.aharon_adv);
-  setFormVal('fMalchielAdv', st.malchiel_adv);
+  sv('fDiscount',0); sv('fAdvance',st.advance);
+  sv('fAharonAdv',st.aharon_adv); sv('fMalchielAdv',st.malchiel_adv);
   document.getElementById('fAdvPaid').checked = false;
-  setFormVal('fAdvDate','');
-  setFormVal('fIsrael', st.israel_meir);
-  setFormVal('fIdo', st.ido);
-  setFormVal('fNachman', st.nachman);
+  sv('fAdvDate','');
+  sv('fIsrael',st.israel_meir); sv('fIdo',st.ido); sv('fNachman',st.nachman);
   document.getElementById('fFinalPaid').checked = false;
-  setFormVal('fNotes','');
+  sv('fNotes','');
   updateTypeOptions(); updateCalc();
   document.getElementById('formModal').classList.remove('hidden');
 }
 
 function openEdit(id) {
-  const s = D.shabbatot.find(x => x.id === id);
-  if (!s) return;
+  const s = D.shabbatot.find(x=>x.id===id); if(!s) return;
   editId = id;
   document.getElementById('formTitle').textContent = '✏️ עריכת שבת';
   const st = D.settings;
-  setFormVal('fDate', s.date||'');
-  setFormVal('fParasha', s.parasha||'');
-  setFormVal('fHost', s.host_name||'');
+  sv('fDate',s.date||''); sv('fParasha',s.parasha||''); sv('fHost',s.host_name||'');
   document.getElementById('fType').value = s.type||'basic';
   document.getElementById('fPremRooms').value = String(s.prem_rooms||0);
-  setFormVal('fDiscount', s.discount||0);
-  setFormVal('fAdvance', s.advance_amount != null ? s.advance_amount : st.advance);
-  setFormVal('fAharonAdv', s.aharon_adv != null ? s.aharon_adv : st.aharon_adv);
-  setFormVal('fMalchielAdv', s.malchiel_adv != null ? s.malchiel_adv : st.malchiel_adv);
+  sv('fDiscount',s.discount||0);
+  sv('fAdvance',s.advance_amount!=null?s.advance_amount:st.advance);
+  sv('fAharonAdv',s.aharon_adv!=null?s.aharon_adv:st.aharon_adv);
+  sv('fMalchielAdv',s.malchiel_adv!=null?s.malchiel_adv:st.malchiel_adv);
   document.getElementById('fAdvPaid').checked = !!s.advance_paid;
-  setFormVal('fAdvDate', s.advance_date||'');
-  setFormVal('fIsrael', s.israel_meir != null ? s.israel_meir : st.israel_meir);
-  setFormVal('fIdo', s.ido != null ? s.ido : st.ido);
-  setFormVal('fNachman', s.nachman != null ? s.nachman : st.nachman);
+  sv('fAdvDate',s.advance_date||'');
+  sv('fIsrael',s.israel_meir!=null?s.israel_meir:st.israel_meir);
+  sv('fIdo',s.ido!=null?s.ido:st.ido);
+  sv('fNachman',s.nachman!=null?s.nachman:st.nachman);
   document.getElementById('fFinalPaid').checked = !!s.final_paid;
-  setFormVal('fNotes', s.notes||'');
+  sv('fNotes',s.notes||'');
   updateTypeOptions(); updateCalc();
   document.getElementById('formModal').classList.remove('hidden');
 }
 
-function setFormVal(id, val) { const el = document.getElementById(id); if(el) el.value = val; }
+function sv(id,val) { const el=document.getElementById(id); if(el) el.value=val; }
 
 function updateTypeOptions() {
-  const st = D.settings;
-  document.getElementById('optBasic').textContent = 'בסיסי - ' + fmt(st.base_price);
-  document.getElementById('optPremium').textContent = 'פרימיום - ' + fmt(st.premium_price);
+  document.getElementById('optBasic').textContent = 'בסיסי - '+fmt(D.settings.base_price);
+  document.getElementById('optPremium').textContent = 'פרימיום - '+fmt(D.settings.premium_price);
 }
 
 function onDateChange() {
-  const date = document.getElementById('fDate').value;
-  document.getElementById('fParasha').value = getParasha(date);
+  document.getElementById('fParasha').value = getParasha(document.getElementById('fDate').value);
 }
 
 function updateCalc() {
   const st = D.settings;
   const type = document.getElementById('fType').value;
-  const baseP = type === 'premium' ? st.premium_price : st.base_price;
-  const premRooms = +document.getElementById('fPremRooms').value || 0;
-  const price = baseP + premRooms * (st.prem_room_price || 500);
-  const discount = +document.getElementById('fDiscount').value || 0;
+  const baseP = type==='premium'?st.premium_price:st.base_price;
+  const premRooms = +document.getElementById('fPremRooms').value||0;
+  const price = baseP + premRooms*(st.prem_room_price||500);
+  const discount = +document.getElementById('fDiscount').value||0;
   const discounted = price - discount;
-  const advance = +document.getElementById('fAdvance').value || 0;
+  const advance = +document.getElementById('fAdvance').value||0;
   const balance = discounted - advance;
   const workers = (+document.getElementById('fIsrael').value||0)
                 + (+document.getElementById('fIdo').value||0)
                 + (+document.getElementById('fNachman').value||0);
   const remainder = balance - workers;
-  const aharon = Math.floor(remainder / 2);
+  const aharon = Math.floor(remainder/2);
   const malchiel = remainder - aharon;
   document.getElementById('cPrice').textContent = fmt(discounted);
   document.getElementById('cBalance').textContent = fmt(balance);
@@ -823,6 +759,7 @@ function updateCalc() {
 }
 
 function saveForm() {
+  const existing = editId ? D.shabbatot.find(x=>x.id===editId) : null;
   const s = {
     id: editId || Date.now().toString(),
     date: document.getElementById('fDate').value,
@@ -841,14 +778,15 @@ function saveForm() {
     nachman: +document.getElementById('fNachman').value||0,
     final_paid: document.getElementById('fFinalPaid').checked,
     notes: document.getElementById('fNotes').value,
+    wa_sent: existing ? (existing.wa_sent||false) : false,
   };
-  if (editId) D.shabbatot = D.shabbatot.map(x => x.id === editId ? s : x);
+  if (editId) D.shabbatot = D.shabbatot.map(x=>x.id===editId?s:x);
   else D.shabbatot.push(s);
   saveAndSync(); renderAll(); closeForm();
 }
 
 function closeForm() { document.getElementById('formModal').classList.add('hidden'); }
-function closeFormOutside(e) { if (e.target.id === 'formModal') closeForm(); }
+function closeFormOutside(e) { if(e.target.id==='formModal') closeForm(); }
 
 // ============================================================
 // FINANCES
@@ -857,7 +795,7 @@ function totalMalchielEarned() {
   let total = 0;
   for (const s of (D.shabbatot||[])) {
     const c = calcShabbat(s);
-    const ma = s.malchiel_adv != null ? s.malchiel_adv : D.settings.malchiel_adv;
+    const ma = s.malchiel_adv!=null?s.malchiel_adv:D.settings.malchiel_adv;
     if (s.advance_paid) total += ma;
     if (s.final_paid) total += c.malchiel_bal;
   }
@@ -866,84 +804,192 @@ function totalMalchielEarned() {
 
 function renderFinances() {
   const earned = totalMalchielEarned();
-  const received = (D.received||[]).reduce((a,r) => a+r.amount, 0);
-  const expenses = (D.expenses||[]).reduce((a,e) => a+e.amount, 0);
+  const received = (D.received||[]).reduce((a,r)=>a+r.amount,0);
+  const expenses = (D.expenses||[]).reduce((a,e)=>a+e.amount,0);
   const net = earned - received - expenses;
   document.getElementById('finSummary').innerHTML =
-    bStat('סה"כ מגיע לי', fmt(earned), '#e8c97e') +
-    bStat('קיבלתי בפועל', fmt(received), '#7bff9e') +
-    bStat('הוצאות', fmt(expenses), '#ff7b7b') +
-    bStat('יתרה לקבלה', fmt(net), net>=0?'#4a90d9':'#ff7b7b');
-  document.getElementById('receivedList').innerHTML = (D.received||[]).map((r,i) =>
-    '<div class="row-item"><span>' + r.date + (r.note?' — '+r.note:'') + '</span>' +
-    '<div style="display:flex;gap:8px;align-items:center"><span style="color:#7bff9e">' + fmt(r.amount) + '</span>' +
-    '<button class="btn-red btn-tiny" onclick="removeReceived('+i+')">✕</button></div></div>'
-  ).join('');
-  document.getElementById('expensesList').innerHTML = (D.expenses||[]).map((e,i) =>
-    '<div class="row-item"><span>' + e.date + ' — ' + e.desc + '</span>' +
-    '<div style="display:flex;gap:8px;align-items:center"><span style="color:#ff7b7b">' + fmt(e.amount) + '</span>' +
-    '<button class="btn-red btn-tiny" onclick="removeExpense('+i+')">✕</button></div></div>'
-  ).join('');
+    bStat('סה"כ מגיע לי',fmt(earned),'#e8c97e') +
+    bStat('קיבלתי בפועל',fmt(received),'#7bff9e') +
+    bStat('הוצאות',fmt(expenses),'#ff7b7b') +
+    bStat('יתרה לקבלה',fmt(net),net>=0?'#4a90d9':'#ff7b7b');
+
+  document.getElementById('receivedList').innerHTML = (D.received||[]).map(r => {
+    const sentMark = r.wa_sent ? ' <span class="wa-badge sent">נשלח</span>' : '';
+    return '<div class="row-item" id="recv-row-'+r.id+'">'+
+      '<span>'+r.date+(r.note?' — '+r.note:'')+sentMark+'</span>'+
+      '<div style="display:flex;gap:6px;align-items:center">'+
+        '<span style="color:#7bff9e">'+fmt(r.amount)+'</span>'+
+        '<button class="btn-blue btn-tiny" onclick="editReceived(\''+r.id+'\')">✏️</button>'+
+        '<button class="btn-red btn-tiny" onclick="removeReceived(\''+r.id+'\')">✕</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+
+  document.getElementById('expensesList').innerHTML = (D.expenses||[]).map(e => {
+    const sentMark = e.wa_sent ? ' <span class="wa-badge sent">נשלח</span>' : '';
+    return '<div class="row-item" id="exp-row-'+e.id+'">'+
+      '<span>'+e.date+' — '+e.desc+sentMark+'</span>'+
+      '<div style="display:flex;gap:6px;align-items:center">'+
+        '<span style="color:#ff7b7b">'+fmt(e.amount)+'</span>'+
+        '<button class="btn-blue btn-tiny" onclick="editExpense(\''+e.id+'\')">✏️</button>'+
+        '<button class="btn-red btn-tiny" onclick="removeExpense(\''+e.id+'\')">✕</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
 }
 
-function bStat(label, val, color) {
-  return '<div class="big-stat"><div class="big-stat-label">' + label + '</div><div class="big-stat-val" style="color:' + color + '">' + val + '</div></div>';
+function bStat(label,val,color) {
+  return '<div class="big-stat"><div class="big-stat-label">'+label+'</div><div class="big-stat-val" style="color:'+color+'">'+val+'</div></div>';
 }
 
 function addReceived() {
   const amt = +document.getElementById('receiveAmt').value;
   const note = document.getElementById('receiveNote').value;
   if (!amt) return;
-  if (!D.received) D.received = [];
-  D.received.push({ amount: amt, note, date: new Date().toLocaleDateString('he-IL') });
-  document.getElementById('receiveAmt').value = '';
-  document.getElementById('receiveNote').value = '';
+  if (!D.received) D.received=[];
+  D.received.push({id:uid(), amount:amt, note, date:new Date().toLocaleDateString('he-IL'), wa_sent:false});
+  sv('receiveAmt',''); sv('receiveNote','');
   saveAndSync(); renderFinances();
 }
-function removeReceived(i) { D.received.splice(i,1); saveAndSync(); renderFinances(); }
+
+function removeReceived(id) { D.received=(D.received||[]).filter(r=>r.id!==id); saveAndSync(); renderFinances(); }
+
+function editReceived(id) {
+  const r=(D.received||[]).find(x=>x.id===id); if(!r) return;
+  const el=document.getElementById('recv-row-'+id); if(!el) return;
+  el.innerHTML='<div style="display:flex;gap:6px;align-items:center;width:100%">'+
+    '<input type="number" id="er-amt-'+id+'" value="'+r.amount+'" style="width:80px;flex:none">'+
+    '<input type="text" id="er-note-'+id+'" value="'+(r.note||'')+'" placeholder="הערה" style="flex:1">'+
+    '<button class="btn-green btn-tiny" onclick="saveEditReceived(\''+id+'\')">✓</button>'+
+    '<button class="btn-gray btn-tiny" onclick="renderFinances()">✕</button>'+
+  '</div>';
+}
+
+function saveEditReceived(id) {
+  const r=(D.received||[]).find(x=>x.id===id); if(!r) return;
+  r.amount = +document.getElementById('er-amt-'+id).value || r.amount;
+  r.note = document.getElementById('er-note-'+id).value;
+  saveAndSync(); renderFinances();
+}
 
 function addExpense() {
   const amt = +document.getElementById('expAmt').value;
   const desc = document.getElementById('expDesc').value;
-  if (!amt || !desc) return;
-  if (!D.expenses) D.expenses = [];
-  D.expenses.push({ amount: amt, desc, date: new Date().toLocaleDateString('he-IL') });
-  document.getElementById('expAmt').value = '';
-  document.getElementById('expDesc').value = '';
+  if (!amt||!desc) return;
+  if (!D.expenses) D.expenses=[];
+  D.expenses.push({id:uid(), amount:amt, desc, date:new Date().toLocaleDateString('he-IL'), wa_sent:false});
+  sv('expAmt',''); sv('expDesc','');
   saveAndSync(); renderFinances();
 }
-function removeExpense(i) { D.expenses.splice(i,1); saveAndSync(); renderFinances(); }
+
+function removeExpense(id) { D.expenses=(D.expenses||[]).filter(e=>e.id!==id); saveAndSync(); renderFinances(); }
+
+function editExpense(id) {
+  const e=(D.expenses||[]).find(x=>x.id===id); if(!e) return;
+  const el=document.getElementById('exp-row-'+id); if(!el) return;
+  el.innerHTML='<div style="display:flex;gap:6px;align-items:center;width:100%">'+
+    '<input type="text" id="ee-desc-'+id+'" value="'+(e.desc||'')+'" placeholder="תיאור" style="flex:1">'+
+    '<input type="number" id="ee-amt-'+id+'" value="'+e.amount+'" style="width:80px;flex:none">'+
+    '<button class="btn-green btn-tiny" onclick="saveEditExpense(\''+id+'\')">✓</button>'+
+    '<button class="btn-gray btn-tiny" onclick="renderFinances()">✕</button>'+
+  '</div>';
+}
+
+function saveEditExpense(id) {
+  const e=(D.expenses||[]).find(x=>x.id===id); if(!e) return;
+  e.desc = document.getElementById('ee-desc-'+id).value;
+  e.amount = +document.getElementById('ee-amt-'+id).value || e.amount;
+  saveAndSync(); renderFinances();
+}
 
 // ============================================================
-// WHATSAPP
+// WHATSAPP — only unsent
 // ============================================================
+let _waPending = null;
+
 function generateWA() {
-  const earned = totalMalchielEarned();
-  const received = (D.received||[]).reduce((a,r)=>a+r.amount,0);
-  const expenses = (D.expenses||[]).reduce((a,e)=>a+e.amount,0);
-  const net = earned - received - expenses;
-  let lines = ['📋 *דוח כספי - מלכיאל*',''];
-  lines.push('💰 סה"כ שמגיע לי: '+fmt(earned));
-  lines.push('✅ קיבלתי בפועל: '+fmt(received));
-  lines.push('🧾 הוצאות: '+fmt(expenses));
-  lines.push('⚖️ יתרה לקבלה: '+fmt(net));
-  lines.push('');
-  if ((D.expenses||[]).length) {
-    lines.push('📌 *פירוט הוצאות:*');
-    D.expenses.forEach(e => lines.push('• '+e.desc+': '+fmt(e.amount)+' ('+e.date+')'));
+  const unsentShab = (D.shabbatot||[]).filter(s=>!s.wa_sent);
+  const unsentRec = (D.received||[]).filter(r=>!r.wa_sent);
+  const unsentExp = (D.expenses||[]).filter(e=>!e.wa_sent);
+
+  if (!unsentShab.length && !unsentRec.length && !unsentExp.length) {
+    alert('אין נתונים חדשים — הכל כבר נשלח לנרקיס.');
+    return;
+  }
+
+  const earnedNew = unsentShab.reduce((sum,s)=>{
+    const c=calcShabbat(s);
+    const ma=s.malchiel_adv!=null?s.malchiel_adv:D.settings.malchiel_adv;
+    return sum+(s.advance_paid?ma:0)+(s.final_paid?c.malchiel_bal:0);
+  }, 0);
+  const recNew = unsentRec.reduce((a,r)=>a+r.amount,0);
+  const expNew = unsentExp.reduce((a,e)=>a+e.amount,0);
+
+  let lines = ['📋 *עדכון כספי - מלכיאל*',''];
+
+  if (unsentShab.length) {
+    lines.push('📅 *שבתות חדשות:*');
+    [...unsentShab].sort((a,b)=>(a.date||'').localeCompare(b.date||'')).forEach(s=>{
+      const c=calcShabbat(s);
+      lines.push('• פרשת '+(s.parasha||'')+(s.date?' ('+s.date+')':'')+(s.host_name?' — '+s.host_name:''));
+      lines.push('  מחיר: '+fmt(c.discounted)+' | מקדמה: '+(s.advance_paid?'✅':'❌')+' | סופי: '+(s.final_paid?'✅':'❌'));
+    });
     lines.push('');
   }
-  lines.push('📅 *פירוט שבתות:*');
-  (D.shabbatot||[]).forEach(s => {
-    const c = calcShabbat(s);
-    lines.push('• '+(s.parasha||'')+' ('+(s.date||'')+') - '+(s.host_name||''));
-    lines.push('  מחיר: '+fmt(c.discounted)+' | מקדמה: '+(s.advance_paid?'✅':'❌')+' | סופי: '+(s.final_paid?'✅':'❌'));
-  });
+  if (unsentRec.length) {
+    lines.push('💵 *תשלומים שקיבלתי:*');
+    unsentRec.forEach(r=>lines.push('• '+r.date+(r.note?' — '+r.note:'')+': '+fmt(r.amount)));
+    lines.push('');
+  }
+  if (unsentExp.length) {
+    lines.push('🧾 *הוצאות:*');
+    unsentExp.forEach(e=>lines.push('• '+e.date+' — '+e.desc+': '+fmt(e.amount)));
+    lines.push('');
+  }
+
+  lines.push('⚖️ *סיכום עדכון זה:*');
+  if (earnedNew) lines.push('💰 מגיע לי: '+fmt(earnedNew));
+  if (recNew) lines.push('✅ קיבלתי: '+fmt(recNew));
+  if (expNew) lines.push('🧾 הוצאות: '+fmt(expNew));
+  lines.push('🔢 נטו: '+fmt(earnedNew-recNew-expNew));
+
+  const eT=totalMalchielEarned(), rT=(D.received||[]).reduce((a,r)=>a+r.amount,0), xT=(D.expenses||[]).reduce((a,e)=>a+e.amount,0);
+  lines.push('','─────────────────────','📊 *סיכום כולל מצטבר:*');
+  lines.push('💰 סה"כ מגיע לי: '+fmt(eT));
+  lines.push('✅ סה"כ קיבלתי: '+fmt(rT));
+  lines.push('🧾 סה"כ הוצאות: '+fmt(xT));
+  lines.push('⚖️ יתרה לקבלה: '+fmt(eT-rT-xT));
+
   document.getElementById('waText').value = lines.join('\n');
+  _waPending = {
+    shabbatIds: unsentShab.map(s=>s.id),
+    recIds: unsentRec.map(r=>r.id).filter(Boolean),
+    expIds: unsentExp.map(e=>e.id).filter(Boolean)
+  };
   document.getElementById('waModal').classList.remove('hidden');
 }
+
+function markWASent() {
+  if (!_waPending) return;
+  (D.shabbatot||[]).forEach(s=>{ if(_waPending.shabbatIds.includes(s.id)) s.wa_sent=true; });
+  (D.received||[]).forEach(r=>{ if(r.id&&_waPending.recIds.includes(r.id)) r.wa_sent=true; });
+  (D.expenses||[]).forEach(e=>{ if(e.id&&_waPending.expIds.includes(e.id)) e.wa_sent=true; });
+  _waPending = null;
+  saveAndSync(); renderAll();
+}
+
 function copyWA() { navigator.clipboard.writeText(document.getElementById('waText').value).then(()=>alert('הועתק!')); }
-function openWA() { window.open('https://wa.me/?text='+encodeURIComponent(document.getElementById('waText').value),'_blank'); }
+
+function openAndMarkWA() {
+  markWASent();
+  window.open('https://wa.me/?text='+encodeURIComponent(document.getElementById('waText').value),'_blank');
+  closeWA();
+}
+
+function confirmMarkSent() {
+  if (confirm('לסמן את כל הנתונים הנ"ל כנשלחו לנרקיס?')) { markWASent(); closeWA(); }
+}
+
 function closeWA() { document.getElementById('waModal').classList.add('hidden'); }
 
 // ============================================================
@@ -957,14 +1003,13 @@ const SETTINGS_FIELDS = [
 ];
 
 function renderSettings() {
-  document.getElementById('settingsFields').innerHTML = SETTINGS_FIELDS.map(([k,label]) =>
-    '<div><div class="field-label">'+label+'</div>' +
+  document.getElementById('settingsFields').innerHTML = SETTINGS_FIELDS.map(([k,label])=>
+    '<div><div class="field-label">'+label+'</div>'+
     '<input type="number" value="'+(D.settings[k]||0)+'" onchange="updateSetting(\''+k+'\',this.value)"></div>'
   ).join('');
   document.getElementById('currentUrlDisplay').textContent = DB_URL;
 }
-
-function updateSetting(key, val) { D.settings[key] = +val; saveAndSync(); }
+function updateSetting(key,val) { D.settings[key]=+val; saveAndSync(); }
 
 function exportBackup() {
   const blob = new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
@@ -977,7 +1022,10 @@ function exportBackup() {
 function importBackup(e) {
   const file = e.target.files[0]; if(!file) return;
   const r = new FileReader();
-  r.onload = ev => { try { D = JSON.parse(ev.target.result); saveAndSync(); renderAll(); alert('יובא בהצלחה!'); } catch { alert('שגיאה בייבוא'); } };
+  r.onload = ev => {
+    try { D=JSON.parse(ev.target.result); ensureIds(); saveAndSync(); renderAll(); alert('יובא!'); }
+    catch { alert('שגיאה בייבוא'); }
+  };
   r.readAsText(file);
 }
 
@@ -989,56 +1037,35 @@ function doSearch() {
   const resultsEl = document.getElementById('searchResults');
   if (!q) {
     resultsEl.classList.add('hidden');
-    ['shabbatot','finances','settings'].forEach(t => {
-      document.getElementById('tab-'+t).classList.toggle('hidden', t !== currentTab);
-    });
-    if (currentTab === 'finances') renderFinances();
-    if (currentTab === 'settings') renderSettings();
+    ['shabbatot','finances','settings'].forEach(t=>
+      document.getElementById('tab-'+t).classList.toggle('hidden', t!==currentTab)
+    );
+    if (currentTab==='finances') renderFinances();
+    if (currentTab==='settings') renderSettings();
     return;
   }
-  ['shabbatot','finances','settings'].forEach(t => {
-    document.getElementById('tab-'+t).classList.add('hidden');
-  });
-  const shabMatches = (D.shabbatot||[]).filter(s =>
-    (s.parasha||'').toLowerCase().includes(q) ||
-    (s.host_name||'').toLowerCase().includes(q) ||
-    (s.date||'').includes(q) ||
-    (s.notes||'').toLowerCase().includes(q)
+  ['shabbatot','finances','settings'].forEach(t=>document.getElementById('tab-'+t).classList.add('hidden'));
+  const shabM = (D.shabbatot||[]).filter(s=>
+    (s.parasha||'').toLowerCase().includes(q)||(s.host_name||'').toLowerCase().includes(q)||
+    (s.date||'').includes(q)||(s.notes||'').toLowerCase().includes(q)
   );
-  const recMatches = (D.received||[]).map((r,i) => ({...r,_i:i})).filter(r =>
-    (r.note||'').toLowerCase().includes(q) ||
-    (r.date||'').includes(q) ||
-    String(r.amount).includes(q)
+  const recM = (D.received||[]).filter(r=>
+    (r.note||'').toLowerCase().includes(q)||(r.date||'').includes(q)||String(r.amount).includes(q)
   );
-  const expMatches = (D.expenses||[]).map((e,i) => ({...e,_i:i})).filter(e =>
-    (e.desc||'').toLowerCase().includes(q) ||
-    (e.date||'').includes(q) ||
-    String(e.amount).includes(q)
+  const expM = (D.expenses||[]).filter(e=>
+    (e.desc||'').toLowerCase().includes(q)||(e.date||'').includes(q)||String(e.amount).includes(q)
   );
   let html = '';
-  if (shabMatches.length) {
-    html += '<div class="section-title" style="margin-bottom:10px">🕯️ שבתות (' + shabMatches.length + ')</div>';
-    html += shabMatches.map(s => renderCard(s)).join('');
+  if (shabM.length) html += '<div class="section-title" style="margin-bottom:10px">🕯️ שבתות ('+shabM.length+')</div>'+shabM.map(s=>renderCard(s)).join('');
+  if (recM.length) {
+    html += '<div class="section-card" style="margin-bottom:12px"><div class="section-title">💵 הכנסות ('+recM.length+')</div>';
+    html += recM.map(r=>'<div class="row-item"><span>'+(r.date||'')+(r.note?' — '+r.note:'')+'</span><div style="display:flex;gap:8px;align-items:center"><span style="color:#7bff9e">'+fmt(r.amount)+'</span><button class="btn-red btn-tiny" onclick="removeReceived(\''+r.id+'\');doSearch()">✕</button></div></div>').join('')+'</div>';
   }
-  if (recMatches.length) {
-    html += '<div class="section-card" style="margin-bottom:12px"><div class="section-title">💵 הכנסות (' + recMatches.length + ')</div>';
-    html += recMatches.map(r =>
-      '<div class="row-item"><span>' + (r.date||'') + (r.note?' — '+r.note:'') + '</span>' +
-      '<div style="display:flex;gap:8px;align-items:center"><span style="color:#7bff9e">' + fmt(r.amount) + '</span>' +
-      '<button class="btn-red btn-tiny" onclick="removeReceived('+r._i+');doSearch()">✕</button></div></div>'
-    ).join('') + '</div>';
+  if (expM.length) {
+    html += '<div class="section-card" style="margin-bottom:12px"><div class="section-title">🧾 הוצאות ('+expM.length+')</div>';
+    html += expM.map(e=>'<div class="row-item"><span>'+(e.date||'')+' — '+(e.desc||'')+'</span><div style="display:flex;gap:8px;align-items:center"><span style="color:#ff7b7b">'+fmt(e.amount)+'</span><button class="btn-red btn-tiny" onclick="removeExpense(\''+e.id+'\');doSearch()">✕</button></div></div>').join('')+'</div>';
   }
-  if (expMatches.length) {
-    html += '<div class="section-card" style="margin-bottom:12px"><div class="section-title">🧾 הוצאות (' + expMatches.length + ')</div>';
-    html += expMatches.map(e =>
-      '<div class="row-item"><span>' + (e.date||'') + ' — ' + (e.desc||'') + '</span>' +
-      '<div style="display:flex;gap:8px;align-items:center"><span style="color:#ff7b7b">' + fmt(e.amount) + '</span>' +
-      '<button class="btn-red btn-tiny" onclick="removeExpense('+e._i+');doSearch()">✕</button></div></div>'
-    ).join('') + '</div>';
-  }
-  if (!html) {
-    html = '<div class="empty-state"><div style="font-size:32px">🔍</div><div style="font-size:16px;margin-top:8px">לא נמצאו תוצאות עבור "' + document.getElementById('globalSearch').value + '"</div></div>';
-  }
+  if (!html) html='<div class="empty-state"><div style="font-size:32px">🔍</div><div style="font-size:16px;margin-top:8px">לא נמצאו תוצאות</div></div>';
   resultsEl.innerHTML = html;
   resultsEl.classList.remove('hidden');
 }
