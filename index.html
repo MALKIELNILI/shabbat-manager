@@ -157,7 +157,7 @@ button:hover { opacity: 0.85; }
 
 <div id="tab-finances" class="hidden">
   <div class="grid4" style="margin-bottom:16px" id="finSummary"></div>
-  <div class="grid2" style="margin-bottom:16px">
+  <div class="grid2" style="margin-bottom:14px">
     <div class="section-card">
       <div class="section-title">💵 תשלומים שקיבלתי</div>
       <div id="receivedList"></div>
@@ -168,13 +168,25 @@ button:hover { opacity: 0.85; }
       </div>
     </div>
     <div class="section-card">
-      <div class="section-title">🧾 הוצאות לקיזוז</div>
+      <div class="section-title">🧾 הוצאות שלי לקיזוז</div>
       <div id="expensesList"></div>
       <div style="display:flex;gap:8px;margin-top:10px">
         <input type="text" id="expDesc" placeholder="תיאור" style="flex:2">
         <input type="number" id="expAmt" placeholder="סכום" style="flex:1">
         <button class="btn-red" onclick="addExpense()">+ הוסף</button>
       </div>
+    </div>
+  </div>
+  <div class="section-card" style="margin-bottom:14px">
+    <div class="section-title">💸 הוצאות משותפות — שילמתי עבור שנינו</div>
+    <div style="font-size:12px;color:#a0b4cc;margin-bottom:10px;background:#0a1020;border-radius:8px;padding:8px 10px">
+      ℹ️ הסכום מתחלק 50/50 — חלקי מנוכה מהיתרה, חלק אהרון מתווסף לחוב שלו כלפיי
+    </div>
+    <div id="jointExpList"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <input type="text" id="jointDesc" placeholder="תיאור ההוצאה" style="flex:2;min-width:120px">
+      <input type="number" id="jointAmt" placeholder="סכום כולל (שלנו יחד)" style="flex:1;min-width:100px">
+      <button class="btn-blue" onclick="addJointExpense()">+ הוסף</button>
     </div>
   </div>
   <button class="btn-wa" onclick="generateWA()" style="width:100%;padding:14px;font-size:16px;border-radius:12px">
@@ -439,7 +451,7 @@ function setSyncStatus(type, msg) {
 // ============================================================
 function getDefaults() {
   return {
-    shabbatot:[], received:[], expenses:[],
+    shabbatot:[], received:[], expenses:[], joint_expenses:[],
     settings:{
       base_price:13000, premium_price:16000, prem_room_price:500,
       advance:5000, aharon_adv:2500, malchiel_adv:2500,
@@ -465,6 +477,7 @@ function ensureIds() {
   let changed = false;
   (D.received||[]).forEach(r => { if (!r.id) { r.id = uid(); changed = true; } });
   (D.expenses||[]).forEach(e => { if (!e.id) { e.id = uid(); changed = true; } });
+  (D.joint_expenses||[]).forEach(e => { if (!e.id) { e.id = uid(); changed = true; } });
   if (changed) saveLocal();
 }
 
@@ -806,11 +819,19 @@ function renderFinances() {
   const earned = totalMalchielEarned();
   const received = (D.received||[]).reduce((a,r)=>a+r.amount,0);
   const expenses = (D.expenses||[]).reduce((a,e)=>a+e.amount,0);
-  const net = earned - received - expenses;
+  const jointTotal = (D.joint_expenses||[]).reduce((a,e)=>a+e.amount,0);
+  const myJoint = Math.floor(jointTotal/2);
+  const aharonJoint = jointTotal - myJoint;
+  const totalOwedToMe = earned + aharonJoint;
+  const totalDeducted = expenses + myJoint;
+  const net = totalOwedToMe - received - totalDeducted;
+
   document.getElementById('finSummary').innerHTML =
-    bStat('סה"כ מגיע לי',fmt(earned),'#e8c97e') +
+    bStat('מהשבתות',fmt(earned),'#e8c97e') +
+    (aharonJoint>0 ? bStat('חלק אהרון בהוצאות',fmt(aharonJoint),'#a78bfa') : '') +
+    bStat('סה"כ מגיע לי',fmt(totalOwedToMe),'#e8c97e') +
     bStat('קיבלתי בפועל',fmt(received),'#7bff9e') +
-    bStat('הוצאות',fmt(expenses),'#ff7b7b') +
+    bStat('הוצאות (כולל חלקי)',fmt(totalDeducted),'#ff7b7b') +
     bStat('יתרה לקבלה',fmt(net),net>=0?'#4a90d9':'#ff7b7b');
 
   document.getElementById('receivedList').innerHTML = (D.received||[]).map(r => {
@@ -833,6 +854,18 @@ function renderFinances() {
         '<span style="color:#ff7b7b">'+fmt(e.amount)+'</span>'+
         '<button class="btn-blue btn-tiny" onclick="editExpense(\''+e.id+'\')">✏️</button>'+
         '<button class="btn-red btn-tiny" onclick="removeExpense(\''+e.id+'\')">✕</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+
+  document.getElementById('jointExpList').innerHTML = (D.joint_expenses||[]).map(e => {
+    const half = Math.floor(e.amount/2);
+    return '<div class="row-item" id="jexp-row-'+e.id+'">'+
+      '<span>'+e.date+' — '+e.desc+' <span style="color:#a0b4cc;font-size:11px">(חלק שלי: '+fmt(half)+')</span></span>'+
+      '<div style="display:flex;gap:6px;align-items:center">'+
+        '<span style="color:#a78bfa">'+fmt(e.amount)+'</span>'+
+        '<button class="btn-blue btn-tiny" onclick="editJointExpense(\''+e.id+'\')">✏️</button>'+
+        '<button class="btn-red btn-tiny" onclick="removeJointExpense(\''+e.id+'\')">✕</button>'+
       '</div>'+
     '</div>';
   }).join('');
@@ -902,6 +935,36 @@ function saveEditExpense(id) {
   saveAndSync(); renderFinances();
 }
 
+function addJointExpense() {
+  const amt = +document.getElementById('jointAmt').value;
+  const desc = document.getElementById('jointDesc').value;
+  if (!amt||!desc) return;
+  if (!D.joint_expenses) D.joint_expenses=[];
+  D.joint_expenses.push({id:uid(), amount:amt, desc, date:new Date().toLocaleDateString('he-IL')});
+  sv('jointAmt',''); sv('jointDesc','');
+  saveAndSync(); renderFinances();
+}
+
+function removeJointExpense(id) { D.joint_expenses=(D.joint_expenses||[]).filter(e=>e.id!==id); saveAndSync(); renderFinances(); }
+
+function editJointExpense(id) {
+  const e=(D.joint_expenses||[]).find(x=>x.id===id); if(!e) return;
+  const el=document.getElementById('jexp-row-'+id); if(!el) return;
+  el.innerHTML='<div style="display:flex;gap:6px;align-items:center;width:100%">'+
+    '<input type="text" id="je-desc-'+id+'" value="'+(e.desc||'')+'" placeholder="תיאור" style="flex:1">'+
+    '<input type="number" id="je-amt-'+id+'" value="'+e.amount+'" style="width:90px;flex:none">'+
+    '<button class="btn-green btn-tiny" onclick="saveEditJointExpense(\''+id+'\')">✓</button>'+
+    '<button class="btn-gray btn-tiny" onclick="renderFinances()">✕</button>'+
+  '</div>';
+}
+
+function saveEditJointExpense(id) {
+  const e=(D.joint_expenses||[]).find(x=>x.id===id); if(!e) return;
+  e.desc = document.getElementById('je-desc-'+id).value;
+  e.amount = +document.getElementById('je-amt-'+id).value || e.amount;
+  saveAndSync(); renderFinances();
+}
+
 // ============================================================
 // WHATSAPP — only unsent
 // ============================================================
@@ -911,6 +974,7 @@ function generateWA() {
   const unsentShab = (D.shabbatot||[]).filter(s=>!s.wa_sent);
   const unsentRec = (D.received||[]).filter(r=>!r.wa_sent);
   const unsentExp = (D.expenses||[]).filter(e=>!e.wa_sent);
+  const allJoint = D.joint_expenses||[];
 
   if (!unsentShab.length && !unsentRec.length && !unsentExp.length) {
     alert('אין נתונים חדשים — הכל כבר נשלח לנרקיס.');
@@ -947,6 +1011,15 @@ function generateWA() {
     lines.push('');
   }
 
+  if (allJoint.length) {
+    const jointTotal = allJoint.reduce((a,e)=>a+e.amount,0);
+    const aharonHalf = jointTotal - Math.floor(jointTotal/2);
+    lines.push('🤝 *הוצאות משותפות (חלק אהרון):*');
+    allJoint.forEach(e=>lines.push('• '+e.date+' — '+e.desc+': '+fmt(e.amount)+' (חלק אהרון: '+fmt(e.amount-Math.floor(e.amount/2))+')'));
+    lines.push('סה"כ חלק אהרון: '+fmt(aharonHalf));
+    lines.push('');
+  }
+
   lines.push('⚖️ *סיכום עדכון זה:*');
   if (earnedNew) lines.push('💰 מגיע לי: '+fmt(earnedNew));
   if (recNew) lines.push('✅ קיבלתי: '+fmt(recNew));
@@ -954,11 +1027,14 @@ function generateWA() {
   lines.push('🔢 נטו: '+fmt(earnedNew-recNew-expNew));
 
   const eT=totalMalchielEarned(), rT=(D.received||[]).reduce((a,r)=>a+r.amount,0), xT=(D.expenses||[]).reduce((a,e)=>a+e.amount,0);
+  const jT=allJoint.reduce((a,e)=>a+e.amount,0), myJ=Math.floor(jT/2), ahJ=jT-myJ;
   lines.push('','─────────────────────','📊 *סיכום כולל מצטבר:*');
-  lines.push('💰 סה"כ מגיע לי: '+fmt(eT));
+  lines.push('💰 מהשבתות: '+fmt(eT));
+  if (ahJ) lines.push('🤝 חלק אהרון בהוצאות: '+fmt(ahJ));
+  lines.push('💰 סה"כ מגיע לי: '+fmt(eT+ahJ));
   lines.push('✅ סה"כ קיבלתי: '+fmt(rT));
-  lines.push('🧾 סה"כ הוצאות: '+fmt(xT));
-  lines.push('⚖️ יתרה לקבלה: '+fmt(eT-rT-xT));
+  lines.push('🧾 סה"כ הוצאות (כולל חלקי): '+fmt(xT+myJ));
+  lines.push('⚖️ יתרה לקבלה: '+fmt(eT+ahJ-rT-xT-myJ));
 
   document.getElementById('waText').value = lines.join('\n');
   _waPending = {
