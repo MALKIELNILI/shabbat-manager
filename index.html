@@ -180,7 +180,7 @@ button:hover { opacity: 0.85; }
   <div class="section-card" style="margin-bottom:14px">
     <div class="section-title">💸 הוצאות משותפות — שילמתי עבור שנינו</div>
     <div style="font-size:12px;color:#a0b4cc;margin-bottom:10px;background:#0a1020;border-radius:8px;padding:8px 10px">
-      ℹ️ הסכום מתחלק 50/50 — חלקי מנוכה מהיתרה, חלק אהרון מתווסף לחוב שלו כלפיי
+      ℹ️ הסכום מתחלק 50/50 — חלק אהרון (שאני שילמתי עבורו) מתווסף ליתרה שמגיע לי
     </div>
     <div id="jointExpList"></div>
     <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
@@ -820,18 +820,15 @@ function renderFinances() {
   const received = (D.received||[]).reduce((a,r)=>a+r.amount,0);
   const expenses = (D.expenses||[]).reduce((a,e)=>a+e.amount,0);
   const jointTotal = (D.joint_expenses||[]).reduce((a,e)=>a+e.amount,0);
-  const myJoint = Math.floor(jointTotal/2);
-  const aharonJoint = jointTotal - myJoint;
-  const totalOwedToMe = earned + aharonJoint;
-  const totalDeducted = expenses + myJoint;
-  const net = totalOwedToMe - received - totalDeducted;
+  const aharonJoint = jointTotal - Math.floor(jointTotal/2);
+  const net = earned + aharonJoint - received - expenses;
 
   document.getElementById('finSummary').innerHTML =
     bStat('מהשבתות',fmt(earned),'#e8c97e') +
-    (aharonJoint>0 ? bStat('חלק אהרון בהוצאות',fmt(aharonJoint),'#a78bfa') : '') +
-    bStat('סה"כ מגיע לי',fmt(totalOwedToMe),'#e8c97e') +
+    (aharonJoint>0 ? bStat('חלק אהרון בהוצאות משותפות',fmt(aharonJoint),'#a78bfa') : '') +
+    bStat('סה"כ מגיע לי',fmt(earned+aharonJoint),'#e8c97e') +
     bStat('קיבלתי בפועל',fmt(received),'#7bff9e') +
-    bStat('הוצאות (כולל חלקי)',fmt(totalDeducted),'#ff7b7b') +
+    bStat('הוצאות לקיזוז',fmt(expenses),'#ff7b7b') +
     bStat('יתרה לקבלה',fmt(net),net>=0?'#4a90d9':'#ff7b7b');
 
   document.getElementById('receivedList').innerHTML = (D.received||[]).map(r => {
@@ -859,9 +856,9 @@ function renderFinances() {
   }).join('');
 
   document.getElementById('jointExpList').innerHTML = (D.joint_expenses||[]).map(e => {
-    const half = Math.floor(e.amount/2);
+    const aharonHalf = e.amount - Math.floor(e.amount/2);
     return '<div class="row-item" id="jexp-row-'+e.id+'">'+
-      '<span>'+e.date+' — '+e.desc+' <span style="color:#a0b4cc;font-size:11px">(חלק שלי: '+fmt(half)+')</span></span>'+
+      '<span>'+e.date+' — '+e.desc+' <span style="color:#a78bfa;font-size:11px">(חלק אהרון: '+fmt(aharonHalf)+')</span></span>'+
       '<div style="display:flex;gap:6px;align-items:center">'+
         '<span style="color:#a78bfa">'+fmt(e.amount)+'</span>'+
         '<button class="btn-blue btn-tiny" onclick="editJointExpense(\''+e.id+'\')">✏️</button>'+
@@ -1027,14 +1024,14 @@ function generateWA() {
   lines.push('🔢 נטו: '+fmt(earnedNew-recNew-expNew));
 
   const eT=totalMalchielEarned(), rT=(D.received||[]).reduce((a,r)=>a+r.amount,0), xT=(D.expenses||[]).reduce((a,e)=>a+e.amount,0);
-  const jT=allJoint.reduce((a,e)=>a+e.amount,0), myJ=Math.floor(jT/2), ahJ=jT-myJ;
+  const jT=allJoint.reduce((a,e)=>a+e.amount,0), ahJ=jT-Math.floor(jT/2);
   lines.push('','─────────────────────','📊 *סיכום כולל מצטבר:*');
   lines.push('💰 מהשבתות: '+fmt(eT));
-  if (ahJ) lines.push('🤝 חלק אהרון בהוצאות: '+fmt(ahJ));
+  if (ahJ) lines.push('🤝 חלק אהרון בהוצאות משותפות: '+fmt(ahJ));
   lines.push('💰 סה"כ מגיע לי: '+fmt(eT+ahJ));
   lines.push('✅ סה"כ קיבלתי: '+fmt(rT));
-  lines.push('🧾 סה"כ הוצאות (כולל חלקי): '+fmt(xT+myJ));
-  lines.push('⚖️ יתרה לקבלה: '+fmt(eT+ahJ-rT-xT-myJ));
+  lines.push('🧾 סה"כ הוצאות לקיזוז: '+fmt(xT));
+  lines.push('⚖️ יתרה לקבלה: '+fmt(eT+ahJ-rT-xT));
 
   document.getElementById('waText').value = lines.join('\n');
   _waPending = {
