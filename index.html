@@ -464,6 +464,7 @@ function getDefaults() {
 let D = JSON.parse(localStorage.getItem('shabbat_local')||'null') || getDefaults();
 let editId = null;
 let currentTab = 'shabbatot';
+let quickEditId = null;
 
 function saveLocal() {
   D.lastModified = Date.now();
@@ -619,6 +620,7 @@ function renderAll() {
 }
 
 function renderCard(s) {
+  if (quickEditId === s.id) return renderCardEdit(s);
   const c = calcShabbat(s);
   const ma = s.malchiel_adv!=null?s.malchiel_adv:D.settings.malchiel_adv;
   const aa = s.aharon_adv!=null?s.aharon_adv:D.settings.aharon_adv;
@@ -633,15 +635,15 @@ function renderCard(s) {
     : 'בסיסי'+(premRooms>0?' + '+premRooms+' חדר פרימיום 🛏️':'');
   const waBadge = s.wa_sent ? ' <span class="wa-badge sent">📲 נשלח לנרקיס</span>' : '';
 
-  return '<div class="card">'+
+  return '<div class="card" onclick="startQuickEdit(\''+s.id+'\')" style="cursor:pointer;transition:opacity 0.2s;opacity:1" onmouseover="this.style.opacity=0.9" onmouseout="this.style.opacity=1">'+
     '<div class="card-top-bar" style="background:'+barColor+'"></div>'+
     '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'+
       '<div>'+
         '<div style="font-size:19px;font-weight:700;color:#e8c97e;margin-bottom:2px">פרשת '+(s.parasha||'—')+waBadge+'</div>'+
         '<div style="color:#a0b4cc;font-size:13px">'+(s.date||'')+' | מזמין: <span style="color:#fff">'+(s.host_name||'—')+'</span></div>'+
       '</div>'+
-      '<div style="display:flex;gap:8px">'+
-        '<button class="btn-blue btn-tiny" onclick="openEdit(\''+s.id+'\')">✏️ ערוך</button>'+
+      '<div style="display:flex;gap:8px" onclick="event.stopPropagation()">'+
+        '<button class="btn-blue btn-tiny" onclick="openEdit(\''+s.id+'\')">✏️ ערוך מלא</button>'+
         '<button class="btn-red btn-tiny" onclick="deleteShabbat(\''+s.id+'\')">🗑</button>'+
       '</div>'+
     '</div>'+
@@ -651,12 +653,12 @@ function renderCard(s) {
       '<div class="stat-box"><div class="stat-label">יתרת חוב</div><div class="stat-val" style="color:'+(debtLeft>0?'#ff7b7b':'#7bff9e')+'">'+fmt(debtLeft)+'</div></div>'+
     '</div>'+
     '<div class="grid2" style="margin-bottom:10px">'+
-      '<div class="pay-box" style="background:'+(s.advance_paid?'#0a2e1a':'#1a0a0a')+';border:1px solid '+(s.advance_paid?'#7bff9e44':'#ff7b7b44')+'" onclick="togglePay(\''+s.id+'\',\'advance\')">'+
+      '<div class="pay-box" style="background:'+(s.advance_paid?'#0a2e1a':'#1a0a0a')+';border:1px solid '+(s.advance_paid?'#7bff9e44':'#ff7b7b44')+'" onclick="event.stopPropagation();togglePay(\''+s.id+'\',\'advance\')">'+
         '<div style="font-size:12px;color:#a0b4cc;margin-bottom:3px">מקדמה</div>'+
         '<div style="font-size:16px;font-weight:700;color:'+(s.advance_paid?'#7bff9e':'#ff7b7b')+'">'+fmt(c.advance)+'</div>'+
         '<div style="font-size:11px;color:'+(s.advance_paid?'#7bff9e':'#ff7b7b')+'">'+(s.advance_paid?'✅ שולם '+(s.advance_date||''):'⏳ ממתין — לחץ לאישור')+'</div>'+
       '</div>'+
-      '<div class="pay-box" style="background:'+(s.final_paid?'#0a2e1a':'#1a0a0a')+';border:1px solid '+(s.final_paid?'#7bff9e44':'#ff7b7b44')+'" onclick="togglePay(\''+s.id+'\',\'final\')">'+
+      '<div class="pay-box" style="background:'+(s.final_paid?'#0a2e1a':'#1a0a0a')+';border:1px solid '+(s.final_paid?'#7bff9e44':'#ff7b7b44')+'" onclick="event.stopPropagation();togglePay(\''+s.id+'\',\'final\')">'+
         '<div style="font-size:12px;color:#a0b4cc;margin-bottom:3px">תשלום סופי</div>'+
         '<div style="font-size:16px;font-weight:700;color:'+(s.final_paid?'#7bff9e':'#ff7b7b')+'">'+fmt(c.balance)+'</div>'+
         '<div style="font-size:11px;color:'+(s.final_paid?'#7bff9e':'#ff7b7b')+'">'+(s.final_paid?'✅ שולם':'⏳ ממתין — לחץ לאישור')+'</div>'+
@@ -677,6 +679,147 @@ function renderCard(s) {
       '</div>'+
     '</div>'+
   '</div>';
+}
+
+function renderCardEdit(s) {
+  const c = calcShabbat(s);
+  const ma = s.malchiel_adv!=null?s.malchiel_adv:D.settings.malchiel_adv;
+  const aa = s.aharon_adv!=null?s.aharon_adv:D.settings.aharon_adv;
+  const im = s.israel_meir!=null?s.israel_meir:D.settings.israel_meir;
+  const ido = s.ido!=null?s.ido:D.settings.ido;
+  const na = s.nachman!=null?s.nachman:D.settings.nachman;
+  const barColor = s.type==='premium'?'linear-gradient(90deg,#e8c97e,#f5e4a6)':'linear-gradient(90deg,#4a90d9,#7ab8f5)';
+  const installments = s.installments || 2;
+
+  const inp = 'background:#0d1628;border:1px solid #2a3a5e;border-radius:6px;color:#e8e8f0;padding:8px;font-size:13px;font-family:inherit;direction:rtl';
+  const sel = inp + ';cursor:pointer';
+
+  return '<div class="card" style="opacity:1" onclick="event.stopPropagation()">'+
+    '<div class="card-top-bar" style="background:'+barColor+'"></div>'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'+
+      '<div>'+
+        '<div style="font-size:19px;font-weight:700;color:#e8c97e;margin-bottom:2px">✏️ עריכה — פרשת '+(s.parasha||'—')+'</div>'+
+        '<div style="color:#a0b4cc;font-size:13px">'+(s.date||'')+' | מזמין: <span style="color:#fff">'+(s.host_name||'—')+'</span></div>'+
+      '</div>'+
+    '</div>'+
+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">'+
+      '<div><label style="font-size:11px;color:#a0b4cc;font-weight:600;display:block;margin-bottom:4px">סוג שבת</label>'+
+        '<select id="edt_type_'+s.id+'" style="'+sel+'" onchange="updateQuickEditCalc(\''+s.id+'\')"><option value="basic" '+(s.type==='basic'?'selected':'')+'>בסיסי</option><option value="premium" '+(s.type==='premium'?'selected':'')+'>פרימיום</option></select>'+
+      '</div>'+
+      '<div><label style="font-size:11px;color:#a0b4cc;font-weight:600;display:block;margin-bottom:4px">חדרים פרימיום נוספים</label>'+
+        '<input type="number" id="edt_rooms_'+s.id+'" style="'+inp+'" value="'+(s.prem_rooms||0)+'" min="0" max="5" onchange="updateQuickEditCalc(\''+s.id+'\')"/>'+
+      '</div>'+
+      '<div><label style="font-size:11px;color:#a0b4cc;font-weight:600;display:block;margin-bottom:4px">הנחה (₪)</label>'+
+        '<input type="number" id="edt_disc_'+s.id+'" style="'+inp+'" value="'+(s.discount||0)+'" min="0" onchange="updateQuickEditCalc(\''+s.id+'\')"/>'+
+      '</div>'+
+    '</div>'+
+
+    '<div style="font-size:12px;font-weight:600;color:#e8c97e;margin:12px 0 8px 0;padding-top:10px;border-top:1px solid #e8c97e22">💰 תשלום ומקדמה</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">'+
+      '<div><label style="font-size:11px;color:#a0b4cc;font-weight:600;display:block;margin-bottom:4px">סכום מקדמה (₪)</label>'+
+        '<input type="number" id="edt_adv_'+s.id+'" style="'+inp+'" value="'+(s.advance_amount!=null?s.advance_amount:D.settings.advance)+'" onchange="updateQuickEditCalc(\''+s.id+'\')"/>'+
+      '</div>'+
+      '<div><label style="font-size:11px;color:#a0b4cc;font-weight:600;display:block;margin-bottom:4px">מספר פעימות (תשלומים)</label>'+
+        '<select id="edt_inst_'+s.id+'" style="'+sel+'" onchange="updateQuickEditCalc(\''+s.id+'\')">'+
+          '<option value="2" '+(installments===2?'selected':'')+'>2 פעימות</option>'+
+          '<option value="3" '+(installments===3?'selected':'')+'>3 פעימות</option>'+
+          '<option value="4" '+(installments===4?'selected':'')+'>4 פעימות</option>'+
+        '</select>'+
+      '</div>'+
+    '</div>'+
+
+    '<div style="font-size:12px;font-weight:600;color:#e8c97e;margin:12px 0 8px 0;padding-top:10px;border-top:1px solid #e8c97e22">👥 חלוקת מקדמה</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">'+
+      '<div><label style="font-size:11px;color:#a0b4cc;font-weight:600;display:block;margin-bottom:4px">אהרון (₪)</label>'+
+        '<input type="number" id="edt_aa_'+s.id+'" style="'+inp+'" value="'+aa+'" onchange="updateQuickEditCalc(\''+s.id+'\')"/>'+
+      '</div>'+
+      '<div><label style="font-size:11px;color:#a0b4cc;font-weight:600;display:block;margin-bottom:4px">מלכיאל (₪)</label>'+
+        '<input type="number" id="edt_ma_'+s.id+'" style="'+inp+'" value="'+ma+'" onchange="updateQuickEditCalc(\''+s.id+'\')"/>'+
+      '</div>'+
+    '</div>'+
+
+    '<div style="font-size:12px;font-weight:600;color:#e8c97e;margin:12px 0 8px 0;padding-top:10px;border-top:1px solid #e8c97e22">🏪 עבודות</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">'+
+      '<div><label style="font-size:11px;color:#a0b4cc;font-weight:600;display:block;margin-bottom:4px">ישראל מאיר (₪)</label>'+
+        '<input type="number" id="edt_im_'+s.id+'" style="'+inp+'" value="'+im+'" onchange="updateQuickEditCalc(\''+s.id+'\')"/>'+
+      '</div>'+
+      '<div><label style="font-size:11px;color:#a0b4cc;font-weight:600;display:block;margin-bottom:4px">עידו (₪)</label>'+
+        '<input type="number" id="edt_ido_'+s.id+'" style="'+inp+'" value="'+ido+'" onchange="updateQuickEditCalc(\''+s.id+'\')"/>'+
+      '</div>'+
+      '<div><label style="font-size:11px;color:#a0b4cc;font-weight:600;display:block;margin-bottom:4px">נחמן (₪)</label>'+
+        '<input type="number" id="edt_na_'+s.id+'" style="'+inp+'" value="'+na+'" onchange="updateQuickEditCalc(\''+s.id+'\')"/>'+
+      '</div>'+
+    '</div>'+
+
+    '<div id="edt_calc_'+s.id+'" style="background:linear-gradient(135deg,#1a2a3e,#0a1020);border:1px solid #e8c97e44;border-radius:8px;padding:12px;margin:12px 0;font-size:12px">'+
+      '<div style="font-weight:700;color:#e8c97e;margin-bottom:10px">📊 חישוב בזמן אמת</div>'+
+      '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:#a0b4cc">מחיר סופי:</span><span style="font-weight:700;color:#e8c97e">'+fmt(c.discounted)+'</span></div>'+
+      '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:#a0b4cc">יתרה להשלמה:</span><span style="font-weight:700;color:#7bff9e">'+fmt(c.balance)+'</span></div>'+
+      '<div style="display:flex;justify-content:space-between;margin-bottom:10px"><span style="color:#a0b4cc">לעבודות:</span><span style="font-weight:700;color:#a0b4cc">'+fmt(c.workers)+'</span></div>'+
+      '<div style="border-top:1px solid #e8c97e22;padding-top:8px">'+
+        '<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:#a0b4cc">אהרון (יתרה):</span><span style="font-weight:700;color:#a0b4cc" id="calc_aa_'+s.id+'">'+fmt(c.aharon_bal)+'</span></div>'+
+        '<div style="display:flex;justify-content:space-between"><span style="color:#e8c97e">מלכיאל (יתרה):</span><span style="font-weight:700;color:#e8c97e" id="calc_ma_'+s.id+'">'+fmt(c.malchiel_bal)+'</span></div>'+
+      '</div>'+
+    '</div>'+
+
+    '<div style="display:flex;gap:8px;justify-content:flex-end">'+
+      '<button class="btn-blue btn-tiny" style="background:#2a2a4e;color:#e8e8f0;padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px" onclick="cancelQuickEdit()">ביטול</button>'+
+      '<button class="btn-blue btn-tiny" style="background:#7bff9e;color:#0a1628;padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px" onclick="saveQuickEdit(\''+s.id+'\')">💾 שמור</button>'+
+    '</div>'+
+  '</div>';
+}
+
+function startQuickEdit(id) {
+  quickEditId = id;
+  renderAll();
+  document.querySelector('.card')?.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function updateQuickEditCalc(id) {
+  const type = document.getElementById('edt_type_'+id).value;
+  const rooms = Number(document.getElementById('edt_rooms_'+id).value) || 0;
+  const discount = Number(document.getElementById('edt_disc_'+id).value) || 0;
+  const advance = Number(document.getElementById('edt_adv_'+id).value) || 0;
+  const aa = Number(document.getElementById('edt_aa_'+id).value) || 0;
+  const ma = Number(document.getElementById('edt_ma_'+id).value) || 0;
+  const im = Number(document.getElementById('edt_im_'+id).value) || 0;
+  const ido = Number(document.getElementById('edt_ido_'+id).value) || 0;
+  const na = Number(document.getElementById('edt_na_'+id).value) || 0;
+
+  const st = D.settings;
+  const baseP = type==='premium' ? st.premium_price : st.base_price;
+  const price = baseP + rooms*(st.prem_room_price||500);
+  const discounted = price - discount;
+  const balance = discounted - advance;
+  const workers = im + ido + na;
+  const remainder = balance - workers;
+  const aharon_bal = Math.floor(remainder/2);
+  const malchiel_bal = remainder - aharon_bal;
+
+  document.getElementById('calc_aa_'+id).textContent = fmt(aharon_bal);
+  document.getElementById('calc_ma_'+id).textContent = fmt(malchiel_bal);
+}
+
+function saveQuickEdit(id) {
+  const s = D.shabbatot.find(x=>x.id===id); if(!s) return;
+  s.type = document.getElementById('edt_type_'+id).value;
+  s.prem_rooms = Number(document.getElementById('edt_rooms_'+id).value) || 0;
+  s.discount = Number(document.getElementById('edt_disc_'+id).value) || 0;
+  s.advance_amount = Number(document.getElementById('edt_adv_'+id).value) || 0;
+  s.aharon_adv = Number(document.getElementById('edt_aa_'+id).value) || 0;
+  s.malchiel_adv = Number(document.getElementById('edt_ma_'+id).value) || 0;
+  s.israel_meir = Number(document.getElementById('edt_im_'+id).value) || 0;
+  s.ido = Number(document.getElementById('edt_ido_'+id).value) || 0;
+  s.nachman = Number(document.getElementById('edt_na_'+id).value) || 0;
+  s.installments = Number(document.getElementById('edt_inst_'+id).value) || 2;
+  quickEditId = null;
+  saveAndSync(); renderAll();
+}
+
+function cancelQuickEdit() {
+  quickEditId = null;
+  renderAll();
 }
 
 function togglePay(id, type) {
