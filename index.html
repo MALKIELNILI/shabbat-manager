@@ -268,14 +268,13 @@ button:hover { opacity: 0.85; }
       <div class="section-title">💰 מקדמה</div>
       <div class="grid3">
         <div><div class="field-label">סכום מקדמה</div><input type="number" id="fAdvance" oninput="updateCalc()"></div>
+        <div><div class="field-label">מספר פעימות</div><select id="fInstallments" onchange="updateInstallmentFields()"><option value="2">2 פעימות</option><option value="3">3 פעימות</option><option value="4">4 פעימות</option></select></div>
+        <div style="display:flex;align-items:center;gap:10px;padding-top:18px"><input type="checkbox" id="fAdvPaid" style="width:20px;height:20px"><label for="fAdvPaid" style="color:#a0b4cc;cursor:pointer">שולמה</label></div>
+      </div>
+      <div id="installmentFields" style="margin-top:10px"></div>
+      <div class="grid3" style="margin-top:8px">
         <div><div class="field-label">אהרון (מקדמה)</div><input type="number" id="fAharonAdv"></div>
         <div><div class="field-label">מלכיאל (מקדמה)</div><input type="number" id="fMalchielAdv"></div>
-      </div>
-      <div class="grid2" style="margin-top:8px">
-        <div style="display:flex;align-items:center;gap:10px;padding-top:18px">
-          <input type="checkbox" id="fAdvPaid" style="width:20px;height:20px">
-          <label for="fAdvPaid" style="color:#a0b4cc;cursor:pointer">מקדמה שולמה</label>
-        </div>
         <div><div class="field-label">תאריך מקדמה</div><input type="date" id="fAdvDate"></div>
       </div>
     </div>
@@ -635,7 +634,7 @@ function renderCard(s) {
     : 'בסיסי'+(premRooms>0?' + '+premRooms+' חדר פרימיום 🛏️':'');
   const waBadge = s.wa_sent ? ' <span class="wa-badge sent">📲 נשלח לנרקיס</span>' : '';
 
-  return '<div class="card" onclick="startQuickEdit(\''+s.id+'\')" style="cursor:pointer;transition:opacity 0.2s;opacity:1" onmouseover="this.style.opacity=0.9" onmouseout="this.style.opacity=1">'+
+  return '<div class="card" onclick="openEdit(\''+s.id+'\')" style="cursor:pointer;transition:opacity 0.2s;opacity:1" onmouseover="this.style.opacity=0.9" onmouseout="this.style.opacity=1">'+
     '<div class="card-top-bar" style="background:'+barColor+'"></div>'+
     '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'+
       '<div>'+
@@ -643,7 +642,7 @@ function renderCard(s) {
         '<div style="color:#a0b4cc;font-size:13px">'+(s.date||'')+' | מזמין: <span style="color:#fff">'+(s.host_name||'—')+'</span></div>'+
       '</div>'+
       '<div style="display:flex;gap:8px" onclick="event.stopPropagation()">'+
-        '<button class="btn-blue btn-tiny" onclick="openEdit(\''+s.id+'\')">✏️ ערוך מלא</button>'+
+        '<button class="btn-blue btn-tiny" onclick="openEdit(\''+s.id+'\')">✏️ ערוך</button>'+
         '<button class="btn-red btn-tiny" onclick="deleteShabbat(\''+s.id+'\')">🗑</button>'+
       '</div>'+
     '</div>'+
@@ -657,6 +656,7 @@ function renderCard(s) {
         '<div style="font-size:12px;color:#a0b4cc;margin-bottom:3px">מקדמה</div>'+
         '<div style="font-size:16px;font-weight:700;color:'+(s.advance_paid?'#7bff9e':'#ff7b7b')+'">'+fmt(c.advance)+'</div>'+
         '<div style="font-size:11px;color:'+(s.advance_paid?'#7bff9e':'#ff7b7b')+'">'+(s.advance_paid?'✅ שולם '+(s.advance_date||''):'⏳ ממתין — לחץ לאישור')+'</div>'+
+        (s.payments && s.payments.length > 0 ? '<div style="font-size:10px;color:#a0b4cc;margin-top:6px;padding-top:6px;border-top:1px solid #e8c97e22">תשלומים: '+s.payments.map((p,i)=>(i+1)+':₪'+p).join(' | ')+'</div>' : '') +
       '</div>'+
       '<div class="pay-box" style="background:'+(s.final_paid?'#0a2e1a':'#1a0a0a')+';border:1px solid '+(s.final_paid?'#7bff9e44':'#ff7b7b44')+'" onclick="event.stopPropagation();togglePay(\''+s.id+'\',\'final\')">'+
         '<div style="font-size:12px;color:#a0b4cc;margin-bottom:3px">תשלום סופי</div>'+
@@ -846,13 +846,14 @@ function openNewForm() {
   document.getElementById('fType').value = 'basic';
   document.getElementById('fPremRooms').value = '0';
   sv('fDiscount',0); sv('fAdvance',st.advance);
+  document.getElementById('fInstallments').value = '2';
   sv('fAharonAdv',st.aharon_adv); sv('fMalchielAdv',st.malchiel_adv);
   document.getElementById('fAdvPaid').checked = false;
   sv('fAdvDate','');
   sv('fIsrael',st.israel_meir); sv('fIdo',st.ido); sv('fNachman',st.nachman);
   document.getElementById('fFinalPaid').checked = false;
   sv('fNotes','');
-  updateTypeOptions(); updateCalc();
+  updateTypeOptions(); updateInstallmentFields(); updateCalc();
   document.getElementById('formModal').classList.remove('hidden');
 }
 
@@ -875,7 +876,14 @@ function openEdit(id) {
   sv('fNachman',s.nachman!=null?s.nachman:st.nachman);
   document.getElementById('fFinalPaid').checked = !!s.final_paid;
   sv('fNotes',s.notes||'');
-  updateTypeOptions(); updateCalc();
+  document.getElementById('fInstallments').value = s.installments || '2';
+  updateTypeOptions(); updateInstallmentFields();
+  const payments = s.payments || [];
+  for (let i = 1; i <= (s.installments || 2); i++) {
+    const el = document.getElementById('fPayment' + i);
+    if (el) el.value = payments[i-1] || 0;
+  }
+  updateCalc();
   document.getElementById('formModal').classList.remove('hidden');
 }
 
@@ -888,6 +896,22 @@ function updateTypeOptions() {
 
 function onDateChange() {
   document.getElementById('fParasha').value = getParasha(document.getElementById('fDate').value);
+}
+
+function updateInstallmentFields() {
+  const installments = +document.getElementById('fInstallments').value || 2;
+  const container = document.getElementById('installmentFields');
+  const advance = +document.getElementById('fAdvance').value || 0;
+  const paidSoFar = advance;
+
+  let html = '<div style="font-size:11px;color:#a0b4cc;margin-bottom:8px">כמה שולם בכל תשלום:</div><div class="grid' + installments + '">';
+
+  for (let i = 1; i <= installments; i++) {
+    html += '<div><label style="font-size:11px">תשלום ' + i + ' (₪)</label><input type="number" id="fPayment' + i + '" value="0" oninput="updateCalc()" style="background:#0d1628;border:1px solid #2a3a5e;border-radius:6px;color:#e8e8f0;padding:6px;font-size:12px;width:100%"></div>';
+  }
+
+  html += '</div>';
+  container.innerHTML = html;
 }
 
 function updateCalc() {
@@ -916,6 +940,12 @@ function updateCalc() {
 
 function saveForm() {
   const existing = editId ? D.shabbatot.find(x=>x.id===editId) : null;
+  const installments = +document.getElementById('fInstallments').value || 2;
+  const payments = [];
+  for (let i = 1; i <= installments; i++) {
+    const val = +document.getElementById('fPayment' + i).value || 0;
+    payments.push(val);
+  }
   const s = {
     id: editId || Date.now().toString(),
     date: document.getElementById('fDate').value,
@@ -925,6 +955,8 @@ function saveForm() {
     prem_rooms: +document.getElementById('fPremRooms').value||0,
     discount: +document.getElementById('fDiscount').value||0,
     advance_amount: +document.getElementById('fAdvance').value||0,
+    installments: installments,
+    payments: payments,
     aharon_adv: +document.getElementById('fAharonAdv').value||0,
     malchiel_adv: +document.getElementById('fMalchielAdv').value||0,
     advance_paid: document.getElementById('fAdvPaid').checked,
