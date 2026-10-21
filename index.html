@@ -986,7 +986,9 @@ async function saveForm() {
   };
   if (editId) D.shabbatot = D.shabbatot.map(x=>x.id===editId?s:x);
   else D.shabbatot.push(s);
+  console.log('[SAVE] Saved:', s);
   await saveAndSync();
+  console.log('[RENDER] Calling renderAll + renderFinances');
   closeForm();
   renderAll();
   renderFinances();
@@ -1005,7 +1007,9 @@ function totalMalchielEarned() {
     const ma = s.malchiel_adv!=null?s.malchiel_adv:D.settings.malchiel_adv;
     if (s.advance_paid) total += ma;
     if (s.final_paid) total += c.malchiel_bal;
+    console.log(`[SHABBAT] ${s.host_name} (${s.date}): workers=${c.workers}, malchiel_bal=${c.malchiel_bal}, advance=${s.advance_paid?ma:0}, final=${s.final_paid?c.malchiel_bal:0}`);
   }
+  console.log(`[TOTAL EARNED] ${total}`);
   return total;
 }
 
