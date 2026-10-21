@@ -987,9 +987,9 @@ async function saveForm() {
   if (editId) D.shabbatot = D.shabbatot.map(x=>x.id===editId?s:x);
   else D.shabbatot.push(s);
   await saveAndSync();
+  closeForm();
   renderAll();
   renderFinances();
-  closeForm();
 }
 
 function closeForm() { document.getElementById('formModal').classList.add('hidden'); }
