@@ -954,7 +954,7 @@ function updateCalc() {
   document.getElementById('cMalchiel').textContent = fmt(malchiel);
 }
 
-function saveForm() {
+async function saveForm() {
   const existing = editId ? D.shabbatot.find(x=>x.id===editId) : null;
   const installments = +document.getElementById('fInstallments').value || 2;
   const payments = [];
@@ -986,11 +986,10 @@ function saveForm() {
   };
   if (editId) D.shabbatot = D.shabbatot.map(x=>x.id===editId?s:x);
   else D.shabbatot.push(s);
-  saveAndSync();
+  await saveAndSync();
   renderAll();
-  closeForm();
-  // חישוב מחדש של כספים (עדכון בפני המשתמש)
   renderFinances();
+  closeForm();
 }
 
 function closeForm() { document.getElementById('formModal').classList.add('hidden'); }
