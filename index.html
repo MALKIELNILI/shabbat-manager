@@ -273,8 +273,8 @@ button:hover { opacity: 0.85; }
       </div>
       <div id="installmentFields" style="margin-top:10px"></div>
       <div class="grid3" style="margin-top:8px">
-        <div><div class="field-label">אהרון (מקדמה)</div><input type="number" id="fAharonAdv"></div>
-        <div><div class="field-label">מלכיאל (מקדמה)</div><input type="number" id="fMalchielAdv"></div>
+        <div><div class="field-label">אהרון (מקדמה)</div><input type="number" id="fAharonAdv" oninput="updateAdvSplit()"></div>
+        <div><div class="field-label">מלכיאל (מקדמה)</div><input type="number" id="fMalchielAdv" oninput="updateAdvSplit()"></div>
         <div><div class="field-label">תאריך מקדמה</div><input type="date" id="fAdvDate"></div>
       </div>
     </div>
@@ -914,6 +914,13 @@ function updateInstallmentFields() {
   container.innerHTML = html;
 }
 
+function updateAdvSplit() {
+  const aharon = +document.getElementById('fAharonAdv').value||0;
+  const malchiel = +document.getElementById('fMalchielAdv').value||0;
+  document.getElementById('fAdvance').value = aharon + malchiel;
+  updateCalc();
+}
+
 function updateCalc() {
   const st = D.settings;
   const type = document.getElementById('fType').value;
@@ -970,7 +977,11 @@ function saveForm() {
   };
   if (editId) D.shabbatot = D.shabbatot.map(x=>x.id===editId?s:x);
   else D.shabbatot.push(s);
-  saveAndSync(); renderAll(); closeForm();
+  saveAndSync();
+  renderAll();
+  closeForm();
+  // חישוב מחדש של כספים (עדכון בפני המשתמש)
+  renderFinances();
 }
 
 function closeForm() { document.getElementById('formModal').classList.add('hidden'); }
