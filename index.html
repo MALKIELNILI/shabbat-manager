@@ -990,9 +990,11 @@ function saveForm() {
   console.log('[SAVE] Updated D.shabbatot:', s);
   saveAndSync();
   closeForm();
-  console.log('[RENDER] Calling renderAll + renderFinances');
-  renderAll();
-  renderFinances();
+  setTimeout(() => {
+    console.log('[RENDER] Calling renderAll + renderFinances after sync');
+    renderAll();
+    renderFinances();
+  }, 500);
 }
 
 function closeForm() { document.getElementById('formModal').classList.add('hidden'); }
