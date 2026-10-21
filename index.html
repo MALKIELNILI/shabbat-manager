@@ -954,7 +954,8 @@ function updateCalc() {
   document.getElementById('cMalchiel').textContent = fmt(malchiel);
 }
 
-async function saveForm() {
+function saveForm() {
+  console.log('[SAVE] saveForm() called');
   const existing = editId ? D.shabbatot.find(x=>x.id===editId) : null;
   const installments = +document.getElementById('fInstallments').value || 2;
   const payments = [];
@@ -986,10 +987,10 @@ async function saveForm() {
   };
   if (editId) D.shabbatot = D.shabbatot.map(x=>x.id===editId?s:x);
   else D.shabbatot.push(s);
-  console.log('[SAVE] Saved:', s);
-  await saveAndSync();
-  console.log('[RENDER] Calling renderAll + renderFinances');
+  console.log('[SAVE] Updated D.shabbatot:', s);
+  saveAndSync();
   closeForm();
+  console.log('[RENDER] Calling renderAll + renderFinances');
   renderAll();
   renderFinances();
 }
