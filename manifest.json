@@ -1,0 +1,19 @@
+{
+  "name": "ניהול שבתות אירוח",
+  "short_name": "שבתות",
+  "description": "מערכת ניהול שבתות אירוח",
+  "start_url": "/shabbat-manager/",
+  "display": "standalone",
+  "background_color": "#0a1628",
+  "theme_color": "#e8c97e",
+  "lang": "he",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
