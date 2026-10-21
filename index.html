@@ -267,7 +267,7 @@ button:hover { opacity: 0.85; }
     <div style="border-top:1px solid #e8c97e22;margin:14px 0;padding-top:14px">
       <div class="section-title">💰 מקדמה</div>
       <div class="grid3">
-        <div><div class="field-label">סכום מקדמה</div><input type="number" id="fAdvance" oninput="updateCalc()"></div>
+        <div><div class="field-label">סכום מקדמה</div><input type="number" id="fAdvance" oninput="updateAdvanceTotal()"></div>
         <div><div class="field-label">מספר פעימות</div><select id="fInstallments" onchange="updateInstallmentFields()"><option value="2">2 פעימות</option><option value="3">3 פעימות</option><option value="4">4 פעימות</option></select></div>
         <div style="display:flex;align-items:center;gap:10px;padding-top:18px"><input type="checkbox" id="fAdvPaid" style="width:20px;height:20px"><label for="fAdvPaid" style="color:#a0b4cc;cursor:pointer">שולמה</label></div>
       </div>
@@ -912,6 +912,15 @@ function updateInstallmentFields() {
 
   html += '</div>';
   container.innerHTML = html;
+}
+
+function updateAdvanceTotal() {
+  const total = +document.getElementById('fAdvance').value||0;
+  const aharon = Math.floor(total/2);
+  const malchiel = total - aharon;
+  document.getElementById('fAharonAdv').value = aharon;
+  document.getElementById('fMalchielAdv').value = malchiel;
+  updateCalc();
 }
 
 function updateAdvSplit() {
