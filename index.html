@@ -1017,6 +1017,7 @@ function totalMalchielEarned() {
 }
 
 function renderFinances() {
+  console.log('[renderFinances] Starting...');
   const earned = totalMalchielEarned();
   const received = (D.received||[]).reduce((a,r)=>a+r.amount,0);
   const expenses = (D.expenses||[]).reduce((a,e)=>a+e.amount,0);
@@ -1024,13 +1025,21 @@ function renderFinances() {
   const aharonJoint = jointTotal - Math.floor(jointTotal/2);
   const net = earned + aharonJoint - received - expenses;
 
-  document.getElementById('finSummary').innerHTML =
-    bStat('מהשבתות',fmt(earned),'#e8c97e') +
-    (aharonJoint>0 ? bStat('חלק אהרון בהוצאות משותפות',fmt(aharonJoint),'#a78bfa') : '') +
-    bStat('סה"כ מגיע לי',fmt(earned+aharonJoint),'#e8c97e') +
-    bStat('קיבלתי בפועל',fmt(received),'#7bff9e') +
-    bStat('הוצאות לקיזוז',fmt(expenses),'#ff7b7b') +
-    bStat('יתרה לקבלה',fmt(net),net>=0?'#4a90d9':'#ff7b7b');
+  console.log(`[renderFinances] earned=${earned}, net=${net}, element=${document.getElementById('finSummary')?'found':'NOT FOUND'}`);
+
+  const el = document.getElementById('finSummary');
+  if (el) {
+    el.innerHTML =
+      bStat('מהשבתות',fmt(earned),'#e8c97e') +
+      (aharonJoint>0 ? bStat('חלק אהרון בהוצאות משותפות',fmt(aharonJoint),'#a78bfa') : '') +
+      bStat('סה"כ מגיע לי',fmt(earned+aharonJoint),'#e8c97e') +
+      bStat('קיבלתי בפועל',fmt(received),'#7bff9e') +
+      bStat('הוצאות לקיזוז',fmt(expenses),'#ff7b7b') +
+      bStat('יתרה לקבלה',fmt(net),net>=0?'#4a90d9':'#ff7b7b');
+    console.log('[renderFinances] DOM updated');
+  } else {
+    console.error('[renderFinances] ERROR: finSummary element not found!');
+  }
 
   document.getElementById('receivedList').innerHTML = (D.received||[]).map(r => {
     const sentMark = r.wa_sent ? ' <span class="wa-badge sent">נשלח</span>' : '';
