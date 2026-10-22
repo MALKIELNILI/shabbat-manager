@@ -1006,7 +1006,14 @@ function closeFormOutside(e) { if(e.target.id==='formModal') closeForm(); }
 function totalMalchielEarned() {
   let total = 0;
   const st = D.settings;
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
+
   for (const s of (D.shabbatot||[])) {
+    // רק שבתות שכבר התרחשו
+    const shabbatDate = new Date(s.date);
+    if (shabbatDate > today) continue;
+
     const baseP = s.type==='premium' ? st.premium_price : st.base_price;
     const price = baseP + (s.prem_rooms||0)*(st.prem_room_price||500);
     const discounted = price - (s.discount||0);
