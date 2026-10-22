@@ -822,11 +822,14 @@ function cancelQuickEdit() {
   renderAll();
 }
 
-function togglePay(id, type) {
+async function togglePay(id, type) {
   const s = D.shabbatot.find(x=>x.id===id); if(!s) return;
   if (type==='advance') s.advance_paid = !s.advance_paid;
   else s.final_paid = !s.final_paid;
-  saveAndSync(); renderAll();
+  saveLocal();
+  await pushToFirebase();
+  renderAll();
+  renderFinances();
 }
 
 function deleteShabbat(id) {
@@ -954,7 +957,7 @@ function updateCalc() {
   document.getElementById('cMalchiel').textContent = fmt(malchiel);
 }
 
-function saveForm() {
+async function saveForm() {
   const existing = editId ? D.shabbatot.find(x=>x.id===editId) : null;
   const installments = +document.getElementById('fInstallments').value || 2;
   const payments = [];
@@ -986,7 +989,8 @@ function saveForm() {
   };
   if (editId) D.shabbatot = D.shabbatot.map(x=>x.id===editId?s:x);
   else D.shabbatot.push(s);
-  saveAndSync();
+  saveLocal();
+  await pushToFirebase();
   renderAll();
   closeForm();
   // חישוב מחדש של כספים (עדכון בפני המשתמש)
