@@ -1015,10 +1015,13 @@ function totalMalchielEarned() {
       total += (c.advance - WORKERS_FIXED) / 2;
     }
 
-    // תשלום סופי: מתחלק תמיד 50/50
+    // תשלום סופי
     if (s.final_paid) {
       const final_payment = c.discounted - c.advance;
-      total += final_payment / 2;
+      const workers_received = Math.min(c.advance, WORKERS_FIXED);
+      const workers_shortage = WORKERS_FIXED - workers_received;
+      const remaining = Math.max(0, final_payment - workers_shortage);
+      total += remaining / 2;
     }
   }
   return total;
