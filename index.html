@@ -1005,41 +1005,11 @@ function closeFormOutside(e) { if(e.target.id==='formModal') closeForm(); }
 // ============================================================
 function totalMalchielEarned() {
   let total = 0;
-  const st = D.settings;
-  const today = new Date();
-  today.setHours(23, 59, 59, 999);
-
   for (const s of (D.shabbatot||[])) {
-    // רק שבתות שכבר התרחשו
-    const shabbatDate = new Date(s.date);
-    if (shabbatDate > today) continue;
-
-    const baseP = s.type==='premium' ? st.premium_price : st.base_price;
-    const price = baseP + (s.prem_rooms||0)*(st.prem_room_price||500);
-    const discounted = price - (s.discount||0);
-    const advance_amount = s.advance_amount!=null ? s.advance_amount : st.advance;
-    const balance = discounted - advance_amount;
-    const workers = (s.israel_meir!=null?s.israel_meir:st.israel_meir)
-                  + (s.ido!=null?s.ido:st.ido)
-                  + (s.nachman!=null?s.nachman:st.nachman);
-    const ma = s.malchiel_adv!=null?s.malchiel_adv:st.malchiel_adv;
-
-    if (s.advance_paid) {
-      total += ma;
-    }
-
-    if (s.final_paid) {
-      const workers_full = 5000;
-      const workers_still_needed = Math.max(0, workers_full - advance_amount);
-
-      // חצי מחוסר העובדים (אם בכלל חסר)
-      total += workers_still_needed / 2;
-
-      // חצי מהשארית אחרי שנתנו לעובדים מה שחסר
-      const remainder = balance - workers_still_needed;
-      const malchiel_remainder = remainder - Math.floor(remainder/2);
-      total += malchiel_remainder;
-    }
+    const c = calcShabbat(s);
+    const ma = s.malchiel_adv!=null?s.malchiel_adv:D.settings.malchiel_adv;
+    if (s.advance_paid) total += ma;
+    if (s.final_paid) total += c.malchiel_bal;
   }
   return total;
 }
