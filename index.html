@@ -1005,24 +1005,11 @@ function closeFormOutside(e) { if(e.target.id==='formModal') closeForm(); }
 // ============================================================
 function totalMalchielEarned() {
   let total = 0;
-  const WORKERS_FIXED = 5000; // חזרנו לקבוע לשבתות הישנות
-
   for (const s of (D.shabbatot||[])) {
     const c = calcShabbat(s);
-
-    // מקדמה: אם יותר מ-5000, מה שנשאר מתחלק 50/50
-    if (s.advance_paid && c.advance > WORKERS_FIXED) {
-      total += (c.advance - WORKERS_FIXED) / 2;
-    }
-
-    // תשלום סופי
-    if (s.final_paid) {
-      const final_payment = c.discounted - c.advance;
-      const workers_received = Math.min(c.advance, WORKERS_FIXED);
-      const workers_shortage = WORKERS_FIXED - workers_received;
-      const remaining = Math.max(0, final_payment - workers_shortage);
-      total += remaining / 2;
-    }
+    const ma = s.malchiel_adv!=null?s.malchiel_adv:D.settings.malchiel_adv;
+    if (s.advance_paid) total += ma;
+    if (s.final_paid) total += c.malchiel_bal;
   }
   return total;
 }
