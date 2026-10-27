@@ -233,7 +233,7 @@ button:hover { opacity: 0.85; }
       </div>
       <div>
         <div class="field-label">פרשת השבוע</div>
-        <input type="text" id="fParasha" placeholder="אוטומטי לפי תאריך">
+        <input type="text" id="fParasha" placeholder="אוטומטי לפי תאריך — או כתוב פרשה והתאריך יתמלא" oninput="onParashaInput()">
       </div>
     </div>
     <div>
@@ -337,6 +337,39 @@ function getParasha(dateStr) {
   d.setDate(d.getDate() + (6 - d.getDay()));
   const sat = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   return PARSHIOT_IL[sat] || '';
+}
+
+// for comparing parasha names however they are spelled: "קורח"/"קרח", "בהעלותך"/"בהעלתך", "לך לך"/"לך-לך".
+// Interior ו/י are dropped, but not a leading one, so "וישלח" stays apart from "שלח".
+function parashaKey(name) {
+  let n = String(name || '').replace(/^פרשת\s+/, '').replace(/[\s\-־'"׳״]/g, '');
+  n = n.charAt(0) + n.slice(1).replace(/[וי]/g, '');
+  return n === 'שלחלך' ? 'שלח' : n;
+}
+
+// the Friday before the next Shabbat (from today) on which this parasha is read
+function dateForParasha(name) {
+  const want = parashaKey(name);
+  if (want.length < 2) return '';
+  const now = new Date(); now.setDate(now.getDate() - 1);
+  const from = now.toISOString().slice(0, 10);
+  const sats = Object.keys(PARSHIOT_IL).filter(d => d >= from).sort();
+  // the exact parasha first; otherwise a combined reading that includes it ("בהר" in "בהר-בחוקותי")
+  const hit = sats.find(d => parashaKey(PARSHIOT_IL[d]) === want)
+           || sats.find(d => PARSHIOT_IL[d].split('-').some(p => parashaKey(p) === want));
+  if (!hit) return '';
+  const fri = new Date(hit + 'T12:00:00'); fri.setDate(fri.getDate() - 1);
+  return fri.getFullYear() + '-' + String(fri.getMonth() + 1).padStart(2, '0') + '-' + String(fri.getDate()).padStart(2, '0');
+}
+
+function onParashaInput() {
+  const name = document.getElementById('fParasha').value;
+  const dateEl = document.getElementById('fDate');
+  // leave the date alone if it already falls on this parasha (e.g. editing an existing booking)
+  const current = getParasha(dateEl.value);
+  if (current && current.split('-').concat(current).some(p => parashaKey(p) === parashaKey(name))) return;
+  const d = dateForParasha(name);
+  if (d) dateEl.value = d;
 }
 
 // ============================================================
