@@ -822,6 +822,7 @@ function openNewForm() {
   sv('fIsrael',st.israel_meir); sv('fIdo',st.ido); sv('fNachman',st.nachman);
   document.getElementById('fFinalPaid').checked = false;
   sv('fNotes','');
+  document.getElementById('installmentFields').innerHTML = '';  // a new booking starts with no payments
   updateTypeOptions(); updateInstallmentFields(); updateCalc();
   document.getElementById('formModal').classList.remove('hidden');
 }
@@ -846,6 +847,7 @@ function openEdit(id) {
   document.getElementById('fFinalPaid').checked = !!s.final_paid;
   sv('fNotes',s.notes||'');
   document.getElementById('fInstallments').value = s.installments || '2';
+  document.getElementById('installmentFields').innerHTML = '';
   updateTypeOptions(); updateInstallmentFields();
   const payments = s.payments || [];
   for (let i = 1; i <= (s.installments || 2); i++) {
@@ -870,17 +872,29 @@ function onDateChange() {
 function updateInstallmentFields() {
   const installments = +document.getElementById('fInstallments').value || 2;
   const container = document.getElementById('installmentFields');
-  const advance = +document.getElementById('fAdvance').value || 0;
-  const paidSoFar = advance;
+  // keep what was already typed when the number of payments changes
+  const kept = [];
+  for (let i = 1; i <= 4; i++) { const el = document.getElementById('fPayment' + i); kept.push(el ? (+el.value || 0) : 0); }
 
-  let html = '<div style="font-size:11px;color:#a0b4cc;margin-bottom:8px">כמה שולם בכל תשלום:</div><div class="grid' + installments + '">';
+  let html = '<div style="font-size:11px;color:#a0b4cc;margin-bottom:8px">כמה שולם בכל תשלום (הסכום נכנס אוטומטית למקדמה):</div><div class="grid' + installments + '">';
 
   for (let i = 1; i <= installments; i++) {
-    html += '<div><label style="font-size:11px">תשלום ' + i + ' (₪)</label><input type="number" id="fPayment' + i + '" value="0" oninput="updateCalc()" style="background:#0d1628;border:1px solid #2a3a5e;border-radius:6px;color:#e8e8f0;padding:6px;font-size:12px;width:100%"></div>';
+    html += '<div><label style="font-size:11px">תשלום ' + i + ' (₪)</label><input type="number" id="fPayment' + i + '" value="' + kept[i-1] + '" oninput="onPaymentInput()" style="background:#0d1628;border:1px solid #2a3a5e;border-radius:6px;color:#e8e8f0;padding:6px;font-size:12px;width:100%"></div>';
   }
 
   html += '</div>';
   container.innerHTML = html;
+}
+
+// the advance is what was actually paid: the sum of the payments typed so far
+function onPaymentInput() {
+  const installments = +document.getElementById('fInstallments').value || 2;
+  let sum = 0;
+  for (let i = 1; i <= installments; i++) sum += +document.getElementById('fPayment' + i).value || 0;
+  if (sum <= 0) { updateCalc(); return; }
+  document.getElementById('fAdvance').value = sum;
+  document.getElementById('fAdvPaid').checked = true;
+  updateAdvanceTotal();
 }
 
 function updateAdvanceTotal() {
