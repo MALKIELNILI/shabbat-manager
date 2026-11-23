@@ -1043,7 +1043,7 @@ function renderFinances() {
     bStat('הוצאות לקיזוז',fmt(expenses),'#ff7b7b') +
     bStat('יתרה לקבלה',fmt(net),net>=0?'#4a90d9':'#ff7b7b');
 
-  document.getElementById('receivedList').innerHTML = (D.received||[]).map(r => {
+  document.getElementById('receivedList').innerHTML = (D.received||[]).slice().reverse().map(r => {
     const sentMark = r.wa_sent ? ' <span class="wa-badge sent">נשלח</span>' : '';
     return '<div class="row-item" id="recv-row-'+r.id+'">'+
       '<span>'+r.date+(r.note?' — '+r.note:'')+sentMark+'</span>'+
@@ -1055,7 +1055,7 @@ function renderFinances() {
     '</div>';
   }).join('');
 
-  document.getElementById('expensesList').innerHTML = (D.expenses||[]).map(e => {
+  document.getElementById('expensesList').innerHTML = (D.expenses||[]).slice().reverse().map(e => {
     const sentMark = e.wa_sent ? ' <span class="wa-badge sent">נשלח</span>' : '';
     return '<div class="row-item" id="exp-row-'+e.id+'">'+
       '<span>'+e.date+' — '+e.desc+sentMark+'</span>'+
@@ -1067,7 +1067,7 @@ function renderFinances() {
     '</div>';
   }).join('');
 
-  document.getElementById('jointExpList').innerHTML = (D.joint_expenses||[]).map(e => {
+  document.getElementById('jointExpList').innerHTML = (D.joint_expenses||[]).slice().reverse().map(e => {
     const aharonHalf = e.amount - Math.floor(e.amount/2);
     return '<div class="row-item" id="jexp-row-'+e.id+'">'+
       '<span>'+e.date+' — '+e.desc+' <span style="color:#a78bfa;font-size:11px">(חלק אהרון: '+fmt(aharonHalf)+')</span></span>'+
