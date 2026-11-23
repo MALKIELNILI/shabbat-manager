@@ -160,21 +160,21 @@ button:hover { opacity: 0.85; }
   <div class="grid2" style="margin-bottom:14px">
     <div class="section-card">
       <div class="section-title">💵 תשלומים שקיבלתי</div>
-      <div id="receivedList"></div>
-      <div style="display:flex;gap:8px;margin-top:10px">
+      <div style="display:flex;gap:8px;margin-bottom:10px">
         <input type="number" id="receiveAmt" placeholder="סכום" style="flex:1">
         <input type="text" id="receiveNote" placeholder="הערה" style="flex:2">
         <button class="btn-green" onclick="addReceived()">+ הוסף</button>
       </div>
+      <div id="receivedList"></div>
     </div>
     <div class="section-card">
       <div class="section-title">🧾 הוצאות שלי לקיזוז</div>
-      <div id="expensesList"></div>
-      <div style="display:flex;gap:8px;margin-top:10px">
+      <div style="display:flex;gap:8px;margin-bottom:10px">
         <input type="text" id="expDesc" placeholder="תיאור" style="flex:2">
         <input type="number" id="expAmt" placeholder="סכום" style="flex:1">
         <button class="btn-red" onclick="addExpense()">+ הוסף</button>
       </div>
+      <div id="expensesList"></div>
     </div>
   </div>
   <div class="section-card" style="margin-bottom:14px">
@@ -182,12 +182,12 @@ button:hover { opacity: 0.85; }
     <div style="font-size:12px;color:#a0b4cc;margin-bottom:10px;background:#0a1020;border-radius:8px;padding:8px 10px">
       ℹ️ הסכום מתחלק 50/50 — חלק אהרון (שאני שילמתי עבורו) מתווסף ליתרה שמגיע לי
     </div>
-    <div id="jointExpList"></div>
-    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
       <input type="text" id="jointDesc" placeholder="תיאור ההוצאה" style="flex:2;min-width:120px">
       <input type="number" id="jointAmt" placeholder="סכום כולל (שלנו יחד)" style="flex:1;min-width:100px">
       <button class="btn-blue" onclick="addJointExpense()">+ הוסף</button>
     </div>
+    <div id="jointExpList"></div>
   </div>
   <button class="btn-wa" onclick="generateWA()" style="width:100%;padding:14px;font-size:16px;border-radius:12px">
     📲 שלח עדכון לנרקיס (נתונים חדשים בלבד)
